@@ -3,9 +3,12 @@ const PORTAL_KEY = 'pra_connector_portal';
 
 export type Portal = 'admin' | 'customer';
 
+/** Production API host (Render). Override with VITE_API_URL if needed. */
+const DEFAULT_PROD_API = 'https://pra-connector-backend.onrender.com';
+
 const API_BASE = (
   import.meta.env.VITE_API_URL ||
-  (import.meta.env.PROD ? 'https://pra-connector-backend.onrender.com' : '')
+  (import.meta.env.DEV ? '' : DEFAULT_PROD_API)
 ).replace(/\/$/, '');
 
 export function getToken() {
@@ -37,7 +40,8 @@ export async function api<T = any>(
   const token = getToken();
   if (token) headers.Authorization = `Bearer ${token}`;
 
-  const res = await fetch(`${API_BASE}/api${path}`, { ...options, headers });
+  const url = `${API_BASE}/api${path}`;
+  const res = await fetch(url, { ...options, headers });
   const data = await res.json().catch(() => ({}));
   if (!res.ok) {
     const msg = Array.isArray(data.message)
