@@ -606,10 +606,9 @@ export function CustomerConnectionsPage() {
               Company: <strong>{data.qbo.companyName}</strong>
             </p>
           )}
-          {company?.company && (
-            <p style={{ color: 'var(--muted)', fontSize: 14 }}>
-              Realm: {company.realmId} · Legal:{' '}
-              {company.company.LegalName || company.company.CompanyName}
+          {data.qboEnvironment && (
+            <p style={{ color: 'var(--muted)', fontSize: 14, marginTop: 0 }}>
+              QBO environment: <strong>{data.qboEnvironment}</strong>
             </p>
           )}
           <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}>
@@ -630,7 +629,7 @@ export function CustomerConnectionsPage() {
             >
               {data.qbo?.status === 'CONNECTED'
                 ? 'Reconnect QuickBooks'
-                : 'Connect QuickBooks (Sandbox)'}
+                : 'Connect QuickBooks (Live)'}
             </button>
             {data.qbo?.status === 'CONNECTED' && (
               <button
@@ -688,9 +687,11 @@ export function CustomerConnectionsPage() {
         </div>
       </div>
 
+      {data.qbo?.status === 'CONNECTED' && <CompanyInfoPanel company={company} />}
+
       {data.qbo?.status === 'CONNECTED' && (
         <div className="card" style={{ marginTop: 16 }}>
-          <h3>Fetched sandbox invoices</h3>
+          <h3>Live QuickBooks invoices (read-only)</h3>
           <table className="table">
             <thead>
               <tr>
@@ -714,7 +715,7 @@ export function CustomerConnectionsPage() {
               {!invoices.length && (
                 <tr>
                   <td colSpan={5} style={{ color: 'var(--muted)' }}>
-                    No invoices returned from sandbox yet.
+                    No invoices returned from QuickBooks yet.
                   </td>
                 </tr>
               )}
@@ -730,6 +731,47 @@ function formatValue(v: any) {
   if (v === null || v === undefined || v === '') return null;
   if (typeof v === 'object') return JSON.stringify(v);
   return String(v);
+}
+
+function formatQboAddress(addr: any) {
+  if (!addr) return null;
+  return [addr.Line1, addr.Line2, addr.City, addr.CountrySubDivisionCode, addr.PostalCode, addr.Country]
+    .filter(Boolean)
+    .join(', ');
+}
+
+function CompanyInfoPanel({ company }: { company: any }) {
+  const info = company?.company;
+  if (!info) return null;
+
+  const rows = [
+    ['Company name', info.CompanyName],
+    ['Legal name', info.LegalName],
+    ['Realm ID', company.realmId],
+    ['Country', info.Country],
+    ['Address', formatQboAddress(info.CompanyAddr)],
+    ['Email', info.Email?.Address],
+    ['Phone', info.PrimaryPhone?.FreeFormNumber],
+    ['Company start', info.CompanyStartDate],
+    ['Fiscal year start', info.FiscalYearStartMonth],
+  ].filter(([, value]) => value);
+
+  return (
+    <div className="card" style={{ marginTop: 16 }}>
+      <h3>Live company profile (read-only)</h3>
+      <p className="map-hint" style={{ marginTop: 0 }}>
+        Fetched from QuickBooks Online — no changes are made in your QBO company.
+      </p>
+      <div className="step-list">
+        {rows.map(([label, value]) => (
+          <div className="step-item" key={label}>
+            <span>{label}</span>
+            <strong style={{ textAlign: 'right', maxWidth: '65%' }}>{value}</strong>
+          </div>
+        ))}
+      </div>
+    </div>
+  );
 }
 
 function MappingSectionTable({
@@ -1215,7 +1257,7 @@ export function CustomerInvoicesPage() {
       <div className="topbar">
         <div>
           <h1>Invoices</h1>
-          <p>Sandbox QuickBooks invoices with PRA tracking status.</p>
+          <p>Live QuickBooks invoices with PRA tracking status.</p>
         </div>
         <button className="btn btn-ghost" disabled={busy} onClick={load}>
           {busy ? 'Refreshing…' : 'Refresh'}
@@ -1227,12 +1269,12 @@ export function CustomerInvoicesPage() {
       {!connected && (
         <div className="card" style={{ marginBottom: 16 }}>
           QuickBooks is not connected.{' '}
-          <Link to="/app/connections">Connect sandbox QBO</Link> to load invoices.
+          <Link to="/app/connections">Connect QuickBooks</Link> to load invoices.
         </div>
       )}
 
       <div className="card">
-        <h3 style={{ marginTop: 0 }}>QuickBooks sandbox invoices</h3>
+        <h3 style={{ marginTop: 0 }}>QuickBooks invoices</h3>
         <table className="table">
           <thead>
             <tr>
@@ -1266,8 +1308,8 @@ export function CustomerInvoicesPage() {
               <tr>
                 <td colSpan={7} style={{ color: 'var(--muted)' }}>
                   {connected
-                    ? 'No invoices returned from QuickBooks sandbox.'
-                    : 'Connect QuickBooks to see sandbox invoices here.'}
+                    ? 'No invoices returned from QuickBooks.'
+                    : 'Connect QuickBooks to see live invoices here.'}
                 </td>
               </tr>
             )}
