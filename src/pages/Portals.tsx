@@ -1,6 +1,12 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { api } from '../lib/api';
+import {
+  collectQboColumns,
+  findHsCodeKeys,
+  flattenQboRecord,
+  formatQboCell,
+} from '../lib/qboTable';
 
 function StatusBadge({ status }: { status?: string }) {
   const s = (status || 'DISCONNECTED').toUpperCase();
@@ -1240,7 +1246,7 @@ export function CustomerInvoicesPage() {
       setTracked(trackedRows || []);
 
       if (isConnected) {
-        const qbo = await api('/customer/qbo/invoices');
+        const qbo = await api('/customer/qbo/invoices?max=25');
         setQboInvoices(qbo.invoices || []);
       } else {
         setQboInvoices([]);
@@ -1260,12 +1266,20 @@ export function CustomerInvoicesPage() {
     tracked.map((t) => [String(t.qboInvoiceId), t]),
   );
 
+  const flatRows = useMemo(
+    () => qboInvoices.map((inv) => flattenQboRecord(inv)),
+    [qboInvoices],
+  );
+
+  const qboColumns = useMemo(() => collectQboColumns(flatRows), [flatRows]);
+  const hsCodeKeys = useMemo(() => findHsCodeKeys(qboColumns), [qboColumns]);
+
   return (
     <>
       <div className="topbar">
         <div>
           <h1>Invoices</h1>
-          <p>Live QuickBooks invoices with PRA tracking status.</p>
+          <p>All QuickBooks invoice fields returned by the API (null and zero values included).</p>
         </div>
         <button className="btn btn-ghost" disabled={busy} onClick={load}>
           {busy ? 'Refreshing…' : 'Refresh'}
@@ -1281,40 +1295,74 @@ export function CustomerInvoicesPage() {
         </div>
       )}
 
-      <div className="card">
-        <h3 style={{ marginTop: 0 }}>QuickBooks invoices</h3>
-        <table className="table">
+      {connected && (
+        <div className="card" style={{ marginBottom: 16 }}>
+          <strong>{qboInvoices.length}</strong> invoice(s) loaded ·{' '}
+          <strong>{qboColumns.length}</strong> QBO field column(s)
+          {hsCodeKeys.length > 0 ? (
+            <>
+              {' '}
+              · HS code field found:{' '}
+              {hsCodeKeys.map((k) => (
+                <code key={k} style={{ marginRight: 8 }}>
+                  {k}
+                </code>
+              ))}
+            </>
+          ) : (
+            <>
+              {' '}
+              · <span style={{ color: 'var(--warn)' }}>
+                HS code custom field not present in API response yet
+              </span>
+            </>
+          )}
+        </div>
+      )}
+
+      <div className="card table-wrap">
+        <h3 style={{ marginTop: 0 }}>QuickBooks invoices (full API payload)</h3>
+        <table className="table qbo-wide-table">
           <thead>
             <tr>
-              <th>Doc # (USIN)</th>
-              <th>Date</th>
-              <th>Customer</th>
-              <th>Amount</th>
-              <th>Balance</th>
+              {qboColumns.map((col) => (
+                <th
+                  key={col}
+                  className={/hs\s*code/i.test(col) ? 'hs-code-col' : undefined}
+                  title={col}
+                >
+                  {col}
+                </th>
+              ))}
               <th>PRA status</th>
               <th>Fiscal #</th>
             </tr>
           </thead>
           <tbody>
-            {qboInvoices.map((inv) => {
+            {qboInvoices.map((inv, idx) => {
+              const flat = flatRows[idx];
               const track = trackedByQboId.get(String(inv.Id));
               return (
-                <tr key={inv.Id}>
-                  <td>{inv.DocNumber || inv.Id}</td>
-                  <td>{inv.TxnDate || '—'}</td>
-                  <td>{inv.CustomerRef?.name || '—'}</td>
-                  <td>{inv.TotalAmt ?? '—'}</td>
-                  <td>{inv.Balance ?? '—'}</td>
+                <tr key={inv.Id || idx}>
+                  {qboColumns.map((col) => (
+                    <td
+                      key={col}
+                      className={/hs\s*code/i.test(col) ? 'hs-code-col' : undefined}
+                      title={formatQboCell(flat[col])}
+                    >
+                      {formatQboCell(flat[col])}
+                    </td>
+                  ))}
                   <td>
                     <StatusBadge status={track?.status || 'PENDING'} />
                   </td>
-                  <td>{track?.fiscalInvoiceNo || '—'}</td>
+                  <td>{track?.fiscalInvoiceNo ?? 'null'}</td>
                 </tr>
               );
             })}
             {!qboInvoices.length && (
               <tr>
-                <td colSpan={7} style={{ color: 'var(--muted)' }}>
+                <td colSpan={Math.max(qboColumns.length + 2, 1)} style={{ color: 'var(--muted)' }}>
                   {connected
                     ? 'No invoices returned from QuickBooks.'
                     : 'Connect QuickBooks to see live invoices here.'}
