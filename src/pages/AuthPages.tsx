@@ -79,7 +79,8 @@ export function AdminLoginPage() {
   const { login, user, portal, loading } = useAuth();
   const navigate = useNavigate();
   const [email, setEmail] = useState('admin@praconnector.com');
-  const [password, setPassword] = useState('Admin@12345');
+  // Matches backend .env seed defaults (SUPER_ADMIN_PASSWORD)
+  const [password, setPassword] = useState('change-me');
   const [error, setError] = useState('');
   const [busy, setBusy] = useState(false);
 
@@ -136,7 +137,8 @@ export function CustomerLoginPage() {
   const { login, user, portal, loading } = useAuth();
   const navigate = useNavigate();
   const [email, setEmail] = useState('demo@fenzi.com');
-  const [password, setPassword] = useState('Demo@12345');
+  // Matches backend .env seed defaults (DEMO_CUSTOMER_PASSWORD)
+  const [password, setPassword] = useState('change-me');
   const [error, setError] = useState('');
   const [busy, setBusy] = useState(false);
 
