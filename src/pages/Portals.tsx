@@ -2,10 +2,12 @@ import { useEffect, useMemo, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { api } from '../lib/api';
 import {
+  collectCustomFieldNames,
   collectQboColumns,
-  findHsCodeKeys,
+  customFieldLabel,
   flattenQboRecord,
   formatQboCell,
+  isCustomFieldValueColumn,
 } from '../lib/qboTable';
 
 function StatusBadge({ status }: { status?: string }) {
@@ -1272,14 +1274,20 @@ export function CustomerInvoicesPage() {
   );
 
   const qboColumns = useMemo(() => collectQboColumns(flatRows), [flatRows]);
-  const hsCodeKeys = useMemo(() => findHsCodeKeys(qboColumns), [qboColumns]);
+  const customFieldNames = useMemo(
+    () => collectCustomFieldNames(qboColumns),
+    [qboColumns],
+  );
 
   return (
     <>
       <div className="topbar">
         <div>
           <h1>Invoices</h1>
-          <p>All QuickBooks invoice fields returned by the API (null and zero values included).</p>
+          <p>
+            Dynamic table of all QuickBooks invoice fields from the API — including every
+            custom field — with null and zero values shown.
+          </p>
         </div>
         <button className="btn btn-ghost" disabled={busy} onClick={load}>
           {busy ? 'Refreshing…' : 'Refresh'}
@@ -1297,25 +1305,21 @@ export function CustomerInvoicesPage() {
 
       {connected && (
         <div className="card" style={{ marginBottom: 16 }}>
-          <strong>{qboInvoices.length}</strong> invoice(s) loaded ·{' '}
-          <strong>{qboColumns.length}</strong> QBO field column(s)
-          {hsCodeKeys.length > 0 ? (
-            <>
-              {' '}
-              · HS code field found:{' '}
-              {hsCodeKeys.map((k) => (
-                <code key={k} style={{ marginRight: 8 }}>
-                  {k}
+          <strong>{qboInvoices.length}</strong> invoice(s) ·{' '}
+          <strong>{qboColumns.length}</strong> columns ·{' '}
+          <strong>{customFieldNames.length}</strong> custom field(s)
+          {customFieldNames.length > 0 ? (
+            <div style={{ marginTop: 8, display: 'flex', flexWrap: 'wrap', gap: 8 }}>
+              {customFieldNames.map((name) => (
+                <code key={name} className="custom-field-chip">
+                  {name}
                 </code>
               ))}
-            </>
+            </div>
           ) : (
-            <>
-              {' '}
-              · <span style={{ color: 'var(--warn)' }}>
-                HS code custom field not present in API response yet
-              </span>
-            </>
+            <div style={{ marginTop: 8, color: 'var(--warn)' }}>
+              No CustomField entries in the API response yet.
+            </div>
           )}
         </div>
       )}
@@ -1328,10 +1332,10 @@ export function CustomerInvoicesPage() {
               {qboColumns.map((col) => (
                 <th
                   key={col}
-                  className={/hs\s*code/i.test(col) ? 'hs-code-col' : undefined}
+                  className={isCustomFieldValueColumn(col) ? 'custom-field-col' : undefined}
                   title={col}
                 >
-                  {col}
+                  {isCustomFieldValueColumn(col) ? customFieldLabel(col) : col}
                 </th>
               ))}
               <th>PRA status</th>
@@ -1347,8 +1351,8 @@ export function CustomerInvoicesPage() {
                   {qboColumns.map((col) => (
                     <td
                       key={col}
-                      className={/hs\s*code/i.test(col) ? 'hs-code-col' : undefined}
-                      title={formatQboCell(flat[col])}
+                      className={isCustomFieldValueColumn(col) ? 'custom-field-col' : undefined}
+                      title={`${col}: ${formatQboCell(flat[col])}`}
                     >
                       {formatQboCell(flat[col])}
                     </td>

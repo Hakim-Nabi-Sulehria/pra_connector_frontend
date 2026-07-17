@@ -1,4 +1,21 @@
-/** Flatten a QBO invoice/object into dot-path keys for table columns. */
+/** Extract the display value from a QBO CustomField object. */
+function customFieldValue(cf: Record<string, unknown>): unknown {
+  if ('StringValue' in cf) return cf.StringValue ?? null;
+  if ('BooleanValue' in cf) return cf.BooleanValue ?? null;
+  if ('DateValue' in cf) return cf.DateValue ?? null;
+  if ('NumberValue' in cf) return cf.NumberValue ?? null;
+  return null;
+}
+
+function isCustomFieldArray(path: string): boolean {
+  return path === 'CustomField' || path.endsWith('.CustomField');
+}
+
+/**
+ * Flatten a QBO invoice into dot-path keys.
+ * CustomField arrays become named columns: CustomField.<Name>
+ * (works for any custom fields — HS code, PCT, etc.)
+ */
 export function flattenQboRecord(
   value: unknown,
   prefix = '',
@@ -11,23 +28,22 @@ export function flattenQboRecord(
 
   if (Array.isArray(value)) {
     const base = prefix || 'item';
-    if (base === 'CustomField' || base.endsWith('.CustomField')) {
+
+    if (isCustomFieldArray(base)) {
       for (const item of value) {
-        if (item && typeof item === 'object' && 'Name' in item) {
-          const cf = item as Record<string, unknown>;
-          const name = String(cf.Name ?? 'unnamed');
-          const cfKey = `${base}.${name}`;
-          out[cfKey] =
-            cf.StringValue ??
-            cf.BooleanValue ??
-            cf.DateValue ??
-            cf.NumberValue ??
-            null;
-          out[`${cfKey}.DefinitionId`] = cf.DefinitionId ?? null;
-          out[`${cfKey}.Type`] = cf.Type ?? null;
-        }
+        if (!item || typeof item !== 'object') continue;
+        const cf = item as Record<string, unknown>;
+        const name = String(cf.Name ?? cf.DefinitionId ?? 'unnamed').trim() || 'unnamed';
+        const cfKey = `${base}.${name}`;
+        // Always set the value key so the column exists even when null/empty.
+        out[cfKey] = customFieldValue(cf);
+        if (cf.DefinitionId != null) out[`${cfKey}.DefinitionId`] = cf.DefinitionId;
+        if (cf.Type != null) out[`${cfKey}.Type`] = cf.Type;
       }
+      // Do not also expand CustomField.0 / CustomField.1 — named columns are enough.
+      return out;
     }
+
     value.forEach((item, index) => {
       flattenQboRecord(item, `${base}.${index}`, out);
     });
@@ -50,6 +66,22 @@ export function flattenQboRecord(
   return out;
 }
 
+export function isCustomFieldColumn(key: string): boolean {
+  return /(^|\.)CustomField\./i.test(key);
+}
+
+/** Value columns only (exclude DefinitionId / Type metadata). */
+export function isCustomFieldValueColumn(key: string): boolean {
+  return isCustomFieldColumn(key) && !/\.(DefinitionId|Type)$/i.test(key);
+}
+
+export function customFieldLabel(key: string): string {
+  const match = key.match(/CustomField\.(.+?)(?:\.(DefinitionId|Type))?$/i);
+  if (!match) return key;
+  if (match[2]) return `${match[1]} (${match[2]})`;
+  return match[1];
+}
+
 export function collectQboColumns(rows: Record<string, unknown>[]): string[] {
   const keys = new Set<string>();
   for (const row of rows) {
@@ -69,30 +101,40 @@ export function collectQboColumns(rows: Record<string, unknown>[]): string[] {
     'PrintStatus',
   ];
 
-  const custom = Array.from(keys)
-    .filter((k) => /customfield/i.test(k))
+  const customValueCols = Array.from(keys)
+    .filter(isCustomFieldValueColumn)
+    .sort((a, b) => customFieldLabel(a).localeCompare(customFieldLabel(b)));
+
+  const customMetaCols = Array.from(keys)
+    .filter((k) => isCustomFieldColumn(k) && !isCustomFieldValueColumn(k))
     .sort();
-  const hs = custom.filter((k) => /hs\s*code/i.test(k));
+
   const rest = Array.from(keys)
-    .filter((k) => !priority.includes(k) && !custom.includes(k))
+    .filter(
+      (k) =>
+        !priority.includes(k) &&
+        !isCustomFieldColumn(k),
+    )
     .sort();
 
   return [
     ...priority.filter((k) => keys.has(k)),
-    ...hs,
-    ...custom.filter((k) => !hs.includes(k)),
+    ...customValueCols,
     ...rest,
+    ...customMetaCols,
   ];
+}
+
+export function collectCustomFieldNames(columns: string[]): string[] {
+  return columns.filter(isCustomFieldValueColumn).map(customFieldLabel);
 }
 
 export function formatQboCell(value: unknown): string {
   if (value === null) return 'null';
   if (value === undefined) return 'undefined';
   if (value === '') return '(empty)';
+  if (typeof value === 'boolean') return value ? 'true' : 'false';
+  if (typeof value === 'number') return String(value);
   if (typeof value === 'object') return JSON.stringify(value);
   return String(value);
-}
-
-export function findHsCodeKeys(columns: string[]): string[] {
-  return columns.filter((c) => /hs\s*code/i.test(c));
 }
