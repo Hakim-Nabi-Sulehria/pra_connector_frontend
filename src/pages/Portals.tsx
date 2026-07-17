@@ -652,8 +652,13 @@ export function CustomerConnectionsPage() {
             )}
           </div>
           <p className="map-hint" style={{ marginTop: 12 }}>
-            Intuit Redirect URI must include:{' '}
-            <code>http://localhost:4000/api/qbo/callback</code>
+            Intuit Developer app → Keys → Redirect URIs must include exactly:{' '}
+            <code>
+              {data.qboRedirectUri ||
+                'https://pra-connector-backend.onrender.com/api/qbo/callback'}
+            </code>
+            . Development keys require <code>QBO_ENVIRONMENT=sandbox</code>;
+            Production keys require <code>QBO_ENVIRONMENT=production</code>.
           </p>
         </div>
         <div className="card">
