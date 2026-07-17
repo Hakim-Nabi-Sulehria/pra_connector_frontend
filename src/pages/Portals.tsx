@@ -619,7 +619,10 @@ export function CustomerConnectionsPage() {
                 setBusy(true);
                 setErr('');
                 try {
-                  const { url } = await api<{ url: string }>('/customer/qbo/auth-url');
+                  const returnOrigin = encodeURIComponent(window.location.origin);
+                  const { url } = await api<{ url: string }>(
+                    `/customer/qbo/auth-url?returnOrigin=${returnOrigin}`,
+                  );
                   window.location.href = url;
                 } catch (e: any) {
                   setErr(e.message);

@@ -7,7 +7,7 @@ import {
   useState,
   type ReactNode,
 } from 'react';
-import { api, clearSession, getPortal, getToken, setSession, type Portal } from './lib/api';
+import { api, ApiError, clearSession, getPortal, getToken, setSession, type Portal } from './lib/api';
 
 export type User = {
   id: string;
@@ -51,10 +51,12 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       const me = await api<User>('/auth/me');
       setUser(me);
       setPortal(getPortal());
-    } catch {
-      clearSession();
-      setUser(null);
-      setPortal(null);
+    } catch (err) {
+      if (err instanceof ApiError && (err.status === 401 || err.status === 403)) {
+        clearSession();
+        setUser(null);
+        setPortal(null);
+      }
     } finally {
       setLoading(false);
     }
