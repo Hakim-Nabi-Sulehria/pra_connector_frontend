@@ -13,8 +13,14 @@ export class ApiError extends Error {
   }
 }
 
-/** Use same-origin /api in dev (Vite proxy) and on Vercel (vercel.json rewrite). */
-const API_BASE = (import.meta.env.VITE_API_URL ?? '').replace(/\/$/, '');
+/** Production API (Render). Override with VITE_API_URL if needed. */
+const DEFAULT_PROD_API = 'https://pra-connector-backend.onrender.com';
+
+/** Dev uses Vite proxy (empty base). Prod calls Render directly — CORS allows *.vercel.app. */
+const API_BASE = (
+  import.meta.env.VITE_API_URL?.replace(/\/$/, '') ||
+  (import.meta.env.DEV ? '' : DEFAULT_PROD_API)
+);
 
 export function getToken() {
   return localStorage.getItem(TOKEN_KEY);
