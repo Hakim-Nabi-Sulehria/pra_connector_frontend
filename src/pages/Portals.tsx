@@ -1317,8 +1317,13 @@ export function CustomerInvoicesPage() {
               ))}
             </div>
           ) : (
-            <div style={{ marginTop: 8, color: 'var(--warn)' }}>
-              No CustomField entries in the API response yet.
+            <div style={{ marginTop: 8, color: 'var(--warn)', maxWidth: 900 }}>
+              No CustomField values in the Invoice REST API response. QBO has two custom-field
+              systems: <strong>legacy sales-form fields</strong> (max 3, API-readable/writable) vs{' '}
+              <strong>Settings → Custom fields</strong> (newer UI — often invisible to REST API).
+              Recreate <code>HS Code</code> and <code>Fiscal Invoice</code> as legacy sales custom
+              fields under Account and settings → Sales → Sales form content, keep them visible
+              (not Hidden), then Refresh. Fiscal write-back also requires those legacy fields.
             </div>
           )}
         </div>
