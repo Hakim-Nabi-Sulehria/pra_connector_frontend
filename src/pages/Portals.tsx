@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { api } from '../lib/api';
+import { useAuth } from '../auth';
 import {
   collectCustomFieldNames,
   collectQboColumns,
@@ -450,6 +451,7 @@ export function CustomerDashboardPage() {
   }, []);
   if (!data) return <p>Loading workspace…</p>;
   const pct = Math.round((data.onboarding.completed / data.onboarding.total) * 100);
+  const qboConnected = data.org?.qbo?.status === 'CONNECTED';
 
   return (
     <>
@@ -459,7 +461,7 @@ export function CustomerDashboardPage() {
           <p>Set it up once — then the connector keeps fiscal posts flowing.</p>
         </div>
         <Link className="btn btn-primary" to="/app/connections">
-          Manage connections
+          {qboConnected ? 'Manage connections' : 'Connect to QuickBooks online'}
         </Link>
       </div>
       <div className="grid kpi" style={{ marginBottom: 16 }}>
@@ -475,6 +477,64 @@ export function CustomerDashboardPage() {
           </div>
         ))}
       </div>
+
+      {qboConnected && (
+        <div className="card" style={{ marginBottom: 16 }}>
+          <h3 style={{ marginTop: 0 }}>Invoice traffic overview</h3>
+          {(() => {
+            const posted = Number(data.kpis.posted || 0);
+            const pending = Number(data.kpis.pending || 0);
+            const failed = Number(data.kpis.failed || 0);
+            const max = Math.max(posted, pending, failed, 1);
+            const successRate =
+              posted + failed === 0
+                ? 100
+                : Math.round((posted / (posted + failed)) * 100);
+            const bars = [
+              { label: 'Posted', value: posted, color: 'var(--ok)' },
+              { label: 'Pending', value: pending, color: 'var(--warn)' },
+              { label: 'Failed', value: failed, color: 'var(--danger)' },
+            ];
+            return (
+              <>
+                <div style={{ display: 'flex', gap: 12, alignItems: 'flex-end' }}>
+                  {bars.map((b) => (
+                    <div key={b.label} style={{ flex: 1, minWidth: 120 }}>
+                      <div
+                        style={{
+                          height: 130,
+                          borderRadius: 14,
+                          border: '1px solid var(--line)',
+                          display: 'flex',
+                          alignItems: 'flex-end',
+                          padding: 10,
+                          background: 'rgba(255,255,255,.65)',
+                        }}
+                      >
+                        <div
+                          style={{
+                            width: '100%',
+                            height: `${Math.round((b.value / max) * 100)}%`,
+                            background: b.color,
+                            borderRadius: 10,
+                            transition: 'height .2s ease',
+                          }}
+                        />
+                      </div>
+                      <div style={{ marginTop: 8, color: 'var(--muted)', fontSize: 13 }}>
+                        {b.label}: <strong style={{ color: 'var(--ink-soft)' }}>{b.value}</strong>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+                <div style={{ marginTop: 10, color: 'var(--muted)' }}>
+                  Success rate (Posted vs Failed): <strong style={{ color: 'var(--ink-soft)' }}>{successRate}%</strong>
+                </div>
+              </>
+            );
+          })()}
+        </div>
+      )}
       <div className="grid two">
         <div className="card">
           <h3>Onboarding runway</h3>
@@ -557,6 +617,7 @@ export function CustomerConnectionsPage() {
   const [invoices, setInvoices] = useState<any[]>([]);
   const [company, setCompany] = useState<any>(null);
   const [busy, setBusy] = useState(false);
+  const { refresh } = useAuth();
 
   async function load() {
     const res = await api('/customer/connections');
@@ -572,6 +633,8 @@ export function CustomerConnectionsPage() {
       } catch (e: any) {
         setErr(e.message);
       }
+      // Side menu gating depends on auth.me() -> refresh qbo status.
+      refresh().catch(() => null);
     } else {
       setCompany(null);
       setInvoices([]);
@@ -1060,7 +1123,7 @@ export function CustomerMappingsPage() {
     <>
       <div className="topbar">
         <div>
-          <h1>Field mappings</h1>
+          <h1>Keys configuration</h1>
           <p>
             Adjust QBO keys against PRA header/line fields, then click Save to persist.
           </p>

@@ -3,6 +3,7 @@ import {
   Activity,
   Building2,
   FileText,
+  KeyRound,
   LayoutDashboard,
   LogOut,
   ScrollText,
@@ -12,6 +13,11 @@ import { useAuth } from '../auth';
 const adminLinks = [
   { to: '/admin', label: 'Dashboard', icon: LayoutDashboard, end: true },
   { to: '/admin/companies', label: 'Companies', icon: Building2 },
+  {
+    to: '/admin/qbo-config',
+    label: 'QuickBooks Online Configuration',
+    icon: KeyRound,
+  },
 ];
 
 export function AdminLayout() {
@@ -66,8 +72,7 @@ export function AdminLayout() {
 const customerLinks = [
   { to: '/app', label: 'Overview', icon: LayoutDashboard, end: true },
   { to: '/app/connections', label: 'Connections', icon: Activity },
-  { to: '/app/mappings', label: 'Field Mappings', icon: ScrollText },
-  { to: '/app/branches', label: 'Branches', icon: Building2 },
+  { to: '/app/mappings', label: 'Keys configuration', icon: ScrollText },
   { to: '/app/invoices', label: 'Invoices', icon: FileText },
   { to: '/app/logs', label: 'Activity', icon: ScrollText },
 ];
@@ -75,6 +80,7 @@ const customerLinks = [
 export function CustomerLayout() {
   const { user, logout } = useAuth();
   const navigate = useNavigate();
+  const qboConnected = user?.organization?.qbo?.status === 'CONNECTED';
 
   return (
     <div className="portal-shell">
@@ -86,7 +92,9 @@ export function CustomerLayout() {
           <div className="brand-sub">Customer Workspace</div>
         </div>
         <nav className="nav-group">
-          {customerLinks.map((l) => (
+          {customerLinks
+            .filter((l) => (l.to === '/app/mappings' ? qboConnected : true))
+            .map((l) => (
             <NavLink
               key={l.to}
               to={l.to}

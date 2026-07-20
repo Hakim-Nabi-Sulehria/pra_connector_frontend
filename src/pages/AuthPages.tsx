@@ -1,6 +1,7 @@
-import { type FormEvent, useState } from 'react';
-import { Link, Navigate, useNavigate } from 'react-router-dom';
+import { type FormEvent, useEffect, useState } from 'react';
+import { Link, Navigate, useNavigate, useSearchParams } from 'react-router-dom';
 import { useAuth } from '../auth';
+import { api } from '../lib/api';
 
 export function LandingPage() {
   return (
@@ -139,15 +140,26 @@ export function CustomerLoginPage() {
   const [password, setPassword] = useState('Demo@12345');
   const [error, setError] = useState('');
   const [busy, setBusy] = useState(false);
+  const [captcha, setCaptcha] = useState(() => {
+    const a = Math.floor(Math.random() * 8) + 1;
+    const b = Math.floor(Math.random() * 8) + 1;
+    return { a, b };
+  });
+  const [captchaInput, setCaptchaInput] = useState('');
+  const captchaOk = captchaInput.trim() === String(captcha.a + captcha.b);
 
   if (!loading && user && portal === 'customer') return <Navigate to="/app" replace />;
 
   async function onSubmit(e: FormEvent) {
     e.preventDefault();
+    if (!captchaOk) {
+      setError('Please solve the captcha to continue.');
+      return;
+    }
     setBusy(true);
     setError('');
     try {
-      await login('customer', email, password);
+      await login('customer', email, password, captchaInput);
       navigate('/app');
     } catch (err: any) {
       setError(err.message || 'Login failed');
@@ -178,8 +190,44 @@ export function CustomerLoginPage() {
             required
           />
         </div>
+        <div className="field">
+          <label>Captcha</label>
+          <div style={{ display: 'flex', gap: 10, alignItems: 'center', flexWrap: 'wrap' }}>
+            <span className="badge" style={{ fontFamily: 'ui-monospace, monospace' }}>
+              {captcha.a} + {captcha.b} = ?
+            </span>
+            <input
+              value={captchaInput}
+              onChange={(e) => setCaptchaInput(e.target.value)}
+              placeholder="Enter answer"
+              style={{ width: 180 }}
+              required
+            />
+            <button
+              type="button"
+              className="btn btn-ghost"
+              onClick={() => {
+                const a = Math.floor(Math.random() * 8) + 1;
+                const b = Math.floor(Math.random() * 8) + 1;
+                setCaptcha({ a, b });
+                setCaptchaInput('');
+              }}
+            >
+              Refresh captcha
+            </button>
+          </div>
+        </div>
         <button className="btn btn-primary" style={{ width: '100%' }} disabled={busy}>
           {busy ? 'Signing in…' : 'Open workspace'}
+        </button>
+        <button
+          className="btn btn-ghost"
+          style={{ width: '100%', marginTop: 10 }}
+          type="button"
+          disabled={busy}
+          onClick={() => navigate('/reset-password')}
+        >
+          Reset password
         </button>
         <p style={{ marginTop: 14, fontSize: 13, color: 'var(--muted)' }}>
           New org? <Link to="/register">Create account</Link>
@@ -253,6 +301,256 @@ export function RegisterPage() {
         </button>
         <p style={{ marginTop: 14, fontSize: 13, color: 'var(--muted)' }}>
           Already onboarded? <Link to="/login">Sign in</Link>
+        </p>
+      </form>
+    </AuthShell>
+  );
+}
+
+export function ResetPasswordRequestPage() {
+  const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
+  const initialEmail = searchParams.get('email') || '';
+  const [email, setEmail] = useState(initialEmail);
+  const [error, setError] = useState('');
+  const [busy, setBusy] = useState(false);
+
+  const [captcha, setCaptcha] = useState(() => {
+    const a = Math.floor(Math.random() * 8) + 1;
+    const b = Math.floor(Math.random() * 8) + 1;
+    return { a, b };
+  });
+  const [captchaInput, setCaptchaInput] = useState('');
+  const captchaOk = captchaInput.trim() === String(captcha.a + captcha.b);
+
+  async function sendOtp(e: FormEvent) {
+    e.preventDefault();
+    setError('');
+    if (!captchaOk) {
+      setError('Please solve captcha.');
+      return;
+    }
+    setBusy(true);
+    try {
+      const res = await api<{ ok: boolean; otp: string }>(
+        '/auth/customer/request-password-reset',
+        {
+          method: 'POST',
+          body: JSON.stringify({ email, captcha: captchaInput }),
+        },
+      );
+      sessionStorage.setItem('resetOtpEmail', email.toLowerCase());
+      sessionStorage.setItem('resetOtp', res.otp);
+      navigate(`/reset-password/otp?email=${encodeURIComponent(email)}`);
+    } catch (err: any) {
+      setError(err.message || 'Failed to send OTP');
+    } finally {
+      setBusy(false);
+    }
+  }
+
+  return (
+    <AuthShell
+      title="Reset password"
+      hint="Enter your email and we will generate an OTP."
+      visualTitle="Secure reset"
+      visualBody="OTP verification protects your account from unauthorized password changes."
+    >
+      <form onSubmit={sendOtp}>
+        {error && <div className="error-box">{error}</div>}
+        <div className="field">
+          <label>Email</label>
+          <input value={email} onChange={(e) => setEmail(e.target.value)} type="email" required />
+        </div>
+        <div className="field">
+          <label>Captcha</label>
+          <div style={{ display: 'flex', gap: 10, alignItems: 'center', flexWrap: 'wrap' }}>
+            <span className="badge" style={{ fontFamily: 'ui-monospace, monospace' }}>
+              {captcha.a} + {captcha.b} = ?
+            </span>
+            <input
+              value={captchaInput}
+              onChange={(e) => setCaptchaInput(e.target.value)}
+              placeholder="Enter answer"
+              style={{ width: 180 }}
+              required
+            />
+            <button
+              type="button"
+              className="btn btn-ghost"
+              onClick={() => {
+                const a = Math.floor(Math.random() * 8) + 1;
+                const b = Math.floor(Math.random() * 8) + 1;
+                setCaptcha({ a, b });
+                setCaptchaInput('');
+              }}
+            >
+              Refresh captcha
+            </button>
+          </div>
+        </div>
+        <button className="btn btn-primary" style={{ width: '100%' }} disabled={busy}>
+          {busy ? 'Sending OTP…' : 'Send OTP'}
+        </button>
+        <p style={{ marginTop: 14, fontSize: 13, color: 'var(--muted)' }}>
+          Back to login? <Link to="/login">Go to login</Link>
+        </p>
+      </form>
+    </AuthShell>
+  );
+}
+
+export function ResetPasswordOtpPage() {
+  const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
+  const initialEmail = searchParams.get('email') || '';
+  const [email] = useState(initialEmail);
+  const [otp, setOtp] = useState(() => sessionStorage.getItem('resetOtp') || '');
+  const [error, setError] = useState('');
+  const [busy, setBusy] = useState(false);
+
+  const debugOtp = sessionStorage.getItem('resetOtp');
+  useEffect(() => {
+    if (!otp && debugOtp) setOtp(debugOtp);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [debugOtp]);
+
+  async function verify(e: FormEvent) {
+    e.preventDefault();
+    setError('');
+    setBusy(true);
+    try {
+      await api('/auth/customer/verify-password-reset-otp', {
+        method: 'POST',
+        body: JSON.stringify({ email, otp }),
+      });
+      navigate(`/reset-password/update?email=${encodeURIComponent(email)}`);
+    } catch (err: any) {
+      setError(err.message || 'OTP verification failed');
+    } finally {
+      setBusy(false);
+    }
+  }
+
+  return (
+    <AuthShell
+      title="Enter OTP"
+      hint="We generated an OTP for password reset."
+      visualTitle="OTP check"
+      visualBody="Confirm your OTP to unlock the password update form."
+    >
+      <form onSubmit={verify}>
+        {error && <div className="error-box">{error}</div>}
+        <div className="field">
+          <label>Email</label>
+          <input value={email} disabled />
+        </div>
+        <div className="field">
+          <label>OTP</label>
+          <input
+            value={otp}
+            onChange={(e) => setOtp(e.target.value)}
+            placeholder="Enter OTP"
+            required
+          />
+          {debugOtp ? (
+            <p className="field-hint">Debug OTP (test): {debugOtp}</p>
+          ) : null}
+        </div>
+        <button className="btn btn-primary" style={{ width: '100%' }} disabled={busy}>
+          {busy ? 'Verifying…' : 'Verify OTP'}
+        </button>
+        <p style={{ marginTop: 14, fontSize: 13, color: 'var(--muted)' }}>
+          Need new OTP?{' '}
+          <Link to={`/reset-password?email=${encodeURIComponent(email)}`}>Resend</Link>
+        </p>
+      </form>
+    </AuthShell>
+  );
+}
+
+export function ResetPasswordUpdatePage() {
+  const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
+  const initialEmail = searchParams.get('email') || '';
+  const [email] = useState(initialEmail);
+
+  const [newPassword, setNewPassword] = useState('');
+  const [confirm, setConfirm] = useState('');
+  const [error, setError] = useState('');
+  const [busy, setBusy] = useState(false);
+
+  const otp = sessionStorage.getItem('resetOtp') || '';
+
+  async function update(e: FormEvent) {
+    e.preventDefault();
+    setError('');
+
+    if (!otp) {
+      setError('OTP missing. Please request a new OTP.');
+      return;
+    }
+    if (newPassword.length < 6) {
+      setError('Password must be at least 6 characters.');
+      return;
+    }
+    if (newPassword !== confirm) {
+      setError('Passwords do not match.');
+      return;
+    }
+
+    setBusy(true);
+    try {
+      await api('/auth/customer/reset-password', {
+        method: 'POST',
+        body: JSON.stringify({ email, otp, newPassword }),
+      });
+      sessionStorage.removeItem('resetOtp');
+      sessionStorage.removeItem('resetOtpEmail');
+      navigate('/login');
+    } catch (err: any) {
+      setError(err.message || 'Failed to update password');
+    } finally {
+      setBusy(false);
+    }
+  }
+
+  return (
+    <AuthShell
+      title="Update password"
+      hint="Set a new password for your workspace account."
+      visualTitle="Password update"
+      visualBody="Choose a strong password and confirm it."
+    >
+      <form onSubmit={update}>
+        {error && <div className="error-box">{error}</div>}
+        <div className="field">
+          <label>Email</label>
+          <input value={email} disabled />
+        </div>
+        <div className="field">
+          <label>Enter new password</label>
+          <input
+            value={newPassword}
+            onChange={(e) => setNewPassword(e.target.value)}
+            type="password"
+            required
+          />
+        </div>
+        <div className="field">
+          <label>Confirm password</label>
+          <input
+            value={confirm}
+            onChange={(e) => setConfirm(e.target.value)}
+            type="password"
+            required
+          />
+        </div>
+        <button className="btn btn-primary" style={{ width: '100%' }} disabled={busy}>
+          {busy ? 'Updating…' : 'Update password'}
+        </button>
+        <p style={{ marginTop: 14, fontSize: 13, color: 'var(--muted)' }}>
+          Back to login? <Link to="/login">Go to login</Link>
         </p>
       </form>
     </AuthShell>

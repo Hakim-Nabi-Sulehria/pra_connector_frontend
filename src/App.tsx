@@ -6,6 +6,9 @@ import {
   CustomerLoginPage,
   LandingPage,
   RegisterPage,
+  ResetPasswordRequestPage,
+  ResetPasswordOtpPage,
+  ResetPasswordUpdatePage,
 } from './pages/AuthPages';
 import {
   AdminOverviewPage,
@@ -21,6 +24,7 @@ import {
   AdminCompanyCreatePage,
   AdminCompanyDetailPage,
 } from './pages/AdminCompanies';
+import { AdminQboConfigPage } from './pages/AdminQboConfig';
 import { PrivacyPage, TermsPage } from './pages/LegalPages';
 
 function Guard({ portal }: { portal: 'admin' | 'customer' }) {
@@ -46,6 +50,9 @@ export default function App() {
         <Route path="/admin/login" element={<AdminLoginPage />} />
         <Route path="/login" element={<CustomerLoginPage />} />
         <Route path="/register" element={<RegisterPage />} />
+        <Route path="/reset-password" element={<ResetPasswordRequestPage />} />
+        <Route path="/reset-password/otp" element={<ResetPasswordOtpPage />} />
+        <Route path="/reset-password/update" element={<ResetPasswordUpdatePage />} />
         <Route path="/terms" element={<TermsPage />} />
         <Route path="/privacy" element={<PrivacyPage />} />
 
@@ -55,6 +62,7 @@ export default function App() {
             <Route path="companies" element={<AdminCompaniesListPage />} />
             <Route path="companies/new" element={<AdminCompanyCreatePage />} />
             <Route path="companies/:id" element={<AdminCompanyDetailPage />} />
+            <Route path="qbo-config" element={<AdminQboConfigPage />} />
             <Route path="organizations" element={<Navigate to="/admin/companies" replace />} />
           </Route>
         </Route>

@@ -22,7 +22,7 @@ type AuthState = {
   user: User | null;
   portal: Portal | null;
   loading: boolean;
-  login: (portal: Portal, email: string, password: string) => Promise<User>;
+  login: (portal: Portal, email: string, password: string, captcha?: string) => Promise<User>;
   register: (payload: {
     email: string;
     password: string;
@@ -66,11 +66,11 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     refresh();
   }, [refresh]);
 
-  const login = useCallback(async (p: Portal, email: string, password: string) => {
+  const login = useCallback(async (p: Portal, email: string, password: string, captcha?: string) => {
     const path = p === 'admin' ? '/auth/admin/login' : '/auth/customer/login';
     const res = await api<{ accessToken: string; user: User }>(path, {
       method: 'POST',
-      body: JSON.stringify({ email, password }),
+      body: JSON.stringify({ email, password, ...(p === 'customer' ? { captcha } : {}) }),
     });
     setSession(res.accessToken, p);
     setPortal(p);
