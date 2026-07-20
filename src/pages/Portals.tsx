@@ -28,27 +28,31 @@ export function AdminOverviewPage() {
   }, []);
 
   if (error) return <div className="error-box">{error}</div>;
-  if (!data) return <p>Loading command center…</p>;
+  if (!data) return <p>Loading dashboard…</p>;
 
   const k = data.kpis;
   return (
     <>
       <div className="topbar">
         <div>
-          <h1>Command Center</h1>
-          <p>Live pulse across every tenant on PRA Connector.</p>
+          <h1>Dashboard</h1>
+          <p>Platform overview — companies, connections, and invoice traffic.</p>
         </div>
+        <Link className="btn btn-primary" to="/admin/companies">
+          Manage companies
+        </Link>
       </div>
       <div className="grid kpi" style={{ marginBottom: 16 }}>
         {[
-          ['Organizations', k.organizations],
+          ['Total companies', k.companies ?? k.organizations],
+          ['Active companies', k.activeCompanies ?? k.companies ?? k.organizations],
           ['Customer users', k.users],
           ['QBO connected', k.connectedQbo],
           ['PRA connected', k.connectedPra],
           ['Posted invoices', k.postedInvoices],
+          ['Pending invoices', k.pendingInvoices ?? 0],
           ['Failed posts', k.failedInvoices],
           ['Success rate', `${k.successRate}%`],
-          ['Audit events', data.recentLogs?.length || 0],
         ].map(([label, value]) => (
           <div className="card kpi-card" key={label as string}>
             <div className="kpi-label">{label}</div>

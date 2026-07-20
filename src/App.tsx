@@ -8,11 +8,7 @@ import {
   RegisterPage,
 } from './pages/AuthPages';
 import {
-  AdminInvoicesPage,
-  AdminLogsPage,
-  AdminOrganizationsPage,
   AdminOverviewPage,
-  AdminUsersPage,
   CustomerBranchesPage,
   CustomerConnectionsPage,
   CustomerDashboardPage,
@@ -20,6 +16,11 @@ import {
   CustomerLogsPage,
   CustomerMappingsPage,
 } from './pages/Portals';
+import {
+  AdminCompaniesListPage,
+  AdminCompanyCreatePage,
+  AdminCompanyDetailPage,
+} from './pages/AdminCompanies';
 import { PrivacyPage, TermsPage } from './pages/LegalPages';
 
 function Guard({ portal }: { portal: 'admin' | 'customer' }) {
@@ -51,10 +52,10 @@ export default function App() {
         <Route element={<Guard portal="admin" />}>
           <Route path="/admin" element={<AdminLayout />}>
             <Route index element={<AdminOverviewPage />} />
-            <Route path="organizations" element={<AdminOrganizationsPage />} />
-            <Route path="users" element={<AdminUsersPage />} />
-            <Route path="invoices" element={<AdminInvoicesPage />} />
-            <Route path="logs" element={<AdminLogsPage />} />
+            <Route path="companies" element={<AdminCompaniesListPage />} />
+            <Route path="companies/new" element={<AdminCompanyCreatePage />} />
+            <Route path="companies/:id" element={<AdminCompanyDetailPage />} />
+            <Route path="organizations" element={<Navigate to="/admin/companies" replace />} />
           </Route>
         </Route>
 

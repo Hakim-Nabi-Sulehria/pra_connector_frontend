@@ -6,16 +6,12 @@ import {
   LayoutDashboard,
   LogOut,
   ScrollText,
-  Users,
 } from 'lucide-react';
 import { useAuth } from '../auth';
 
 const adminLinks = [
-  { to: '/admin', label: 'Command Center', icon: LayoutDashboard, end: true },
-  { to: '/admin/organizations', label: 'Organizations', icon: Building2 },
-  { to: '/admin/users', label: 'Users', icon: Users },
-  { to: '/admin/invoices', label: 'Invoice Traffic', icon: FileText },
-  { to: '/admin/logs', label: 'Audit Stream', icon: ScrollText },
+  { to: '/admin', label: 'Dashboard', icon: LayoutDashboard, end: true },
+  { to: '/admin/companies', label: 'Companies', icon: Building2 },
 ];
 
 export function AdminLayout() {
