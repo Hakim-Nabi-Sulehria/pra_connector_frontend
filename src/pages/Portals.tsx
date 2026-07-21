@@ -1412,6 +1412,7 @@ export function CustomerInvoicesPage() {
               ))}
               <th>PRA status</th>
               <th>Fiscal #</th>
+              <th>Report</th>
             </tr>
           </thead>
           <tbody>
@@ -1433,12 +1434,21 @@ export function CustomerInvoicesPage() {
                     <StatusBadge status={track?.status || 'PENDING'} />
                   </td>
                   <td>{track?.fiscalInvoiceNo ?? 'null'}</td>
+                  <td>
+                    <Link
+                      className="btn btn-ghost"
+                      to={`/app/invoices/${encodeURIComponent(String(inv.Id))}/print`}
+                      title="Open printable invoice with fiscal QR"
+                    >
+                      Print
+                    </Link>
+                  </td>
                 </tr>
               );
             })}
             {!qboInvoices.length && (
               <tr>
-                <td colSpan={Math.max(qboColumns.length + 2, 1)} style={{ color: 'var(--muted)' }}>
+                <td colSpan={Math.max(qboColumns.length + 3, 1)} style={{ color: 'var(--muted)' }}>
                   {connected
                     ? 'No invoices returned from QuickBooks.'
                     : 'Connect QuickBooks to see live invoices here.'}
