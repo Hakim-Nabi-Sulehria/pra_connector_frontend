@@ -983,11 +983,15 @@ textarea {
 @media print {
   @page {
     size: A4 portrait;
-    margin: 8mm;
+    margin: 12mm;
   }
 
   html,
   body {
+    width: 100% !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    overflow: visible !important;
     background: #fff !important;
   }
 
@@ -996,33 +1000,67 @@ textarea {
     display: none !important;
   }
 
-  .portal-shell {
-    display: block !important;
-  }
-
-  .main {
-    padding: 0 !important;
-  }
-
+  .portal-shell,
+  .main,
   .fiscal-report-page {
-    max-width: none;
+    display: block !important;
+    width: 100% !important;
+    max-width: none !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    overflow: visible !important;
   }
 
   .fiscal-print-sheet {
+    box-sizing: border-box;
+    width: 100% !important;
+    max-width: 100% !important;
     min-height: 0;
-    padding: 0;
+    /* Keep content inside printable area even if browser margins are set to Minimum */
+    padding: 10mm 8mm !important;
     border: 0;
+    border-radius: 0;
     box-shadow: none;
+    overflow: hidden;
     print-color-adjust: exact;
     -webkit-print-color-adjust: exact;
   }
 
+  .fiscal-report-header {
+    min-height: 0;
+    gap: 16px;
+  }
+
+  .fiscal-qr-block {
+    width: 120px;
+  }
+
+  .fiscal-qr-block img,
+  .fiscal-qr-placeholder {
+    width: 96px;
+    height: 96px;
+  }
+
   .fiscal-address-grid,
   .fiscal-meta-grid {
-    margin-left: 0;
-    margin-right: 0;
-    padding-left: 14px;
-    padding-right: 14px;
+    margin-left: -8mm;
+    margin-right: -8mm;
+    padding-left: 8mm;
+    padding-right: 8mm;
+  }
+
+  .fiscal-lines-table {
+    width: 100% !important;
+  }
+
+  .fiscal-lines-table th,
+  .fiscal-lines-table td {
+    padding: 7px 5px;
+  }
+
+  .fiscal-report-footer {
+    gap: 24px;
+    grid-template-columns: 1fr 280px;
   }
 }
 
