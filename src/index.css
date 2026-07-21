@@ -1043,6 +1043,9 @@ textarea {
 
   .fiscal-address-grid,
   .fiscal-meta-grid {
+    display: grid !important;
+    grid-template-columns: 1fr 1fr !important;
+    gap: 48px !important;
     margin-left: -8mm;
     margin-right: -8mm;
     padding-left: 8mm;
@@ -1059,12 +1062,14 @@ textarea {
   }
 
   .fiscal-report-footer {
+    display: grid !important;
     gap: 24px;
-    grid-template-columns: 1fr 280px;
+    grid-template-columns: 1fr 280px !important;
   }
 }
 
-@media (max-width: 980px) {
+/* Screen only — print preview uses a narrow viewport and must keep the 2-column layout */
+@media screen and (max-width: 980px) {
   .portal-shell {
     grid-template-columns: 1fr;
   }
