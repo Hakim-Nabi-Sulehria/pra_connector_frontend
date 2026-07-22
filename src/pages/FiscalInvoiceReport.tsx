@@ -213,14 +213,16 @@ export function FiscalInvoiceReportPage() {
             ))}
           </div>
 
-          <div className="fiscal-qr-block">
-            {qrDataUrl ? (
-              <img src={qrDataUrl} alt={`Fiscal invoice QR ${fiscalInvoiceNo}`} />
-            ) : (
-              <div className="fiscal-qr-placeholder">QR</div>
-            )}
-            <span>Fiscal Invoice QR</span>
-          </div>
+          {fiscalInvoiceNo ? (
+            <div className="fiscal-qr-block">
+              {qrDataUrl ? (
+                <img src={qrDataUrl} alt={`Fiscal invoice QR ${fiscalInvoiceNo}`} />
+              ) : (
+                <div className="fiscal-qr-placeholder">QR</div>
+              )}
+              <span>Fiscal Invoice QR</span>
+            </div>
+          ) : null}
         </header>
 
         <section className="fiscal-address-grid">
