@@ -1,16 +1,8 @@
 import { useEffect, useMemo, useState } from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import { api } from '../lib/api';
 import { useAuth } from '../auth';
 import { PageLoader } from '../components/PageLoader';
-import {
-  collectCustomFieldNames,
-  collectQboColumns,
-  customFieldLabel,
-  flattenQboRecord,
-  formatQboCell,
-  isCustomFieldValueColumn,
-} from '../lib/qboTable';
 
 function StatusBadge({ status }: { status?: string }) {
   const s = (status || 'DISCONNECTED').toUpperCase();
@@ -1346,16 +1338,21 @@ export function CustomerBranchesPage() {
 }
 
 export function CustomerInvoicesPage() {
+  const navigate = useNavigate();
   const [qboInvoices, setQboInvoices] = useState<any[]>([]);
   const [tracked, setTracked] = useState<any[]>([]);
   const [error, setError] = useState('');
+  const [msg, setMsg] = useState('');
   const [busy, setBusy] = useState(false);
+  const [posting, setPosting] = useState(false);
   const [connected, setConnected] = useState(false);
   const [loaded, setLoaded] = useState(false);
+  const [selected, setSelected] = useState<Record<string, boolean>>({});
 
   async function load() {
     setBusy(true);
     setError('');
+    setMsg('');
     try {
       const conn = await api('/customer/connections');
       const isConnected = conn?.qbo?.status === 'CONNECTED';
@@ -1370,6 +1367,7 @@ export function CustomerInvoicesPage() {
       setConnected(isConnected);
       setTracked(trackedRows || []);
       setQboInvoices(nextInvoices);
+      setSelected({});
     } catch (e: any) {
       setError(e.message);
     } finally {
@@ -1382,20 +1380,84 @@ export function CustomerInvoicesPage() {
     load();
   }, []);
 
-  const trackedByQboId = new Map(
-    tracked.map((t) => [String(t.qboInvoiceId), t]),
+  const trackedByQboId = useMemo(
+    () => new Map(tracked.map((t) => [String(t.qboInvoiceId), t])),
+    [tracked],
   );
 
-  const flatRows = useMemo(
-    () => qboInvoices.map((inv) => flattenQboRecord(inv)),
+  const ids = useMemo(
+    () => qboInvoices.map((inv) => String(inv.Id)).filter(Boolean),
     [qboInvoices],
   );
-
-  const qboColumns = useMemo(() => collectQboColumns(flatRows), [flatRows]);
-  const customFieldNames = useMemo(
-    () => collectCustomFieldNames(qboColumns),
-    [qboColumns],
+  const selectedIds = useMemo(
+    () => ids.filter((id) => selected[id]),
+    [ids, selected],
   );
+  const allSelected = ids.length > 0 && selectedIds.length === ids.length;
+  const someSelected = selectedIds.length > 0 && !allSelected;
+
+  function toggleOne(id: string) {
+    setSelected((prev) => ({ ...prev, [id]: !prev[id] }));
+  }
+
+  function toggleAll() {
+    if (allSelected) {
+      setSelected({});
+      return;
+    }
+    const next: Record<string, boolean> = {};
+    for (const id of ids) next[id] = true;
+    setSelected(next);
+  }
+
+  async function postSelectedToPra() {
+    if (!selectedIds.length) return;
+    setPosting(true);
+    setError('');
+    setMsg('');
+    try {
+      const results = await Promise.allSettled(
+        selectedIds.map((qboInvoiceId) => {
+          const inv = qboInvoices.find((row) => String(row.Id) === qboInvoiceId);
+          return api('/customer/invoices/attach-fiscal', {
+            method: 'POST',
+            body: JSON.stringify({
+              qboInvoiceId,
+              usin: inv?.DocNumber || qboInvoiceId,
+              customerName: inv?.CustomerRef?.name || undefined,
+              totalAmount: inv?.TotalAmt != null ? Number(inv.TotalAmt) : undefined,
+              writeToQbo: true,
+            }),
+          });
+        }),
+      );
+      const ok = results.filter((r) => r.status === 'fulfilled').length;
+      const failed = results.length - ok;
+      if (failed) {
+        setError(`${ok} posted, ${failed} failed. Check Activity for details.`);
+      } else {
+        setMsg(`${ok} invoice(s) posted to PRA successfully.`);
+      }
+      await load();
+    } catch (e: any) {
+      setError(e.message || 'Bulk post failed');
+    } finally {
+      setPosting(false);
+    }
+  }
+
+  function invoiceCustom(inv: any, name: string) {
+    const match = (inv?.CustomField || []).find(
+      (field: any) => String(field?.Name || '').toLowerCase() === name.toLowerCase(),
+    );
+    const value =
+      match?.StringValue ??
+      match?.NumberValue ??
+      match?.DateValue ??
+      match?.BooleanValue;
+    if (value === null || value === undefined || value === '') return '—';
+    return String(value);
+  }
 
   if (!loaded) {
     return <PageLoader label="Syncing QuickBooks invoices…" />;
@@ -1406,24 +1468,37 @@ export function CustomerInvoicesPage() {
       <div className="topbar">
         <div>
           <h1>Invoices</h1>
-          <p>
-            Dynamic table of all QuickBooks invoice fields from the API — including every
-            custom field — with null and zero values shown.
-          </p>
+          <p>Select invoices to post to PRA, or open any row for print preview.</p>
         </div>
-        <button className="btn btn-ghost" disabled={busy} onClick={load}>
-          {busy ? (
-            <span className="btn-loading">
-              <span className="btn-loading-dot" />
-              Refreshing
-            </span>
-          ) : (
-            'Refresh'
-          )}
-        </button>
+        <div className="invoice-toolbar-actions">
+          <button className="btn btn-ghost" disabled={busy || posting} onClick={load}>
+            {busy ? (
+              <span className="btn-loading">
+                <span className="btn-loading-dot" />
+                Refreshing
+              </span>
+            ) : (
+              'Refresh'
+            )}
+          </button>
+          <button
+            className="btn btn-primary"
+            disabled={!selectedIds.length || posting || busy}
+            onClick={postSelectedToPra}
+          >
+            {posting
+              ? `Posting ${selectedIds.length}…`
+              : `Post to PRA${selectedIds.length ? ` (${selectedIds.length})` : ''}`}
+          </button>
+        </div>
       </div>
 
       {error && <div className="error-box">{error}</div>}
+      {msg && (
+        <div className="card" style={{ marginBottom: 16, color: 'var(--ok)' }}>
+          {msg}
+        </div>
+      )}
 
       {busy && (
         <div className="card" style={{ marginBottom: 16 }}>
@@ -1439,94 +1514,107 @@ export function CustomerInvoicesPage() {
       )}
 
       {!busy && connected && (
-        <div className="card" style={{ marginBottom: 16 }}>
-          <strong>{qboInvoices.length}</strong> invoice(s) ·{' '}
-          <strong>{qboColumns.length}</strong> columns ·{' '}
-          <strong>{customFieldNames.length}</strong> custom field(s)
-          {customFieldNames.length > 0 ? (
-            <div style={{ marginTop: 8, display: 'flex', flexWrap: 'wrap', gap: 8 }}>
-              {customFieldNames.map((name) => (
-                <code key={name} className="custom-field-chip">
-                  {name}
-                </code>
-              ))}
+        <div className="di-invoice-panel">
+          <div className="di-invoice-toolbar">
+            <div>
+              <strong>{qboInvoices.length}</strong> invoice(s)
+              {selectedIds.length > 0 ? (
+                <>
+                  {' '}
+                  · <strong>{selectedIds.length}</strong> selected
+                </>
+              ) : null}
             </div>
-          ) : qboInvoices.length > 0 ? (
-            <div style={{ marginTop: 8, color: 'var(--warn)', maxWidth: 900 }}>
-              No CustomField values in the Invoice REST API response. QBO has two custom-field
-              systems: <strong>legacy sales-form fields</strong> (max 3, API-readable/writable) vs{' '}
-              <strong>Settings → Custom fields</strong> (newer UI — often invisible to REST API).
-              Recreate <code>HS Code</code> and <code>Fiscal Invoice</code> as legacy sales custom
-              fields under Account and settings → Sales → Sales form content, keep them visible
-              (not Hidden), then Refresh. Fiscal write-back also requires those legacy fields.
-            </div>
-          ) : null}
-        </div>
-      )}
+            <button
+              type="button"
+              className="btn btn-ghost"
+              disabled={!ids.length}
+              onClick={toggleAll}
+            >
+              {allSelected ? 'Clear selection' : 'Select all'}
+            </button>
+          </div>
 
-      {!busy && (
-      <div className="card table-wrap">
-        <h3 style={{ marginTop: 0 }}>QuickBooks invoices (full API payload)</h3>
-        <table className="table qbo-wide-table">
-          <thead>
-            <tr>
-              {qboColumns.map((col) => (
-                <th
-                  key={col}
-                  className={isCustomFieldValueColumn(col) ? 'custom-field-col' : undefined}
-                  title={col}
-                >
-                  {isCustomFieldValueColumn(col) ? customFieldLabel(col) : col}
-                </th>
-              ))}
-              <th>PRA status</th>
-              <th>Fiscal #</th>
-              <th>Report</th>
-            </tr>
-          </thead>
-          <tbody>
-            {qboInvoices.map((inv, idx) => {
-              const flat = flatRows[idx];
-              const track = trackedByQboId.get(String(inv.Id));
-              return (
-                <tr key={inv.Id || idx}>
-                  {qboColumns.map((col) => (
-                    <td
-                      key={col}
-                      className={isCustomFieldValueColumn(col) ? 'custom-field-col' : undefined}
-                      title={`${col}: ${formatQboCell(flat[col])}`}
-                    >
-                      {formatQboCell(flat[col])}
-                    </td>
-                  ))}
-                  <td>
-                    <StatusBadge status={track?.status || 'PENDING'} />
-                  </td>
-                  <td>{track?.fiscalInvoiceNo ?? 'null'}</td>
-                  <td>
-                    <Link
-                      className="btn btn-ghost"
-                      to={`/app/invoices/${encodeURIComponent(String(inv.Id))}/print`}
-                      title="Open printable invoice with fiscal QR"
-                    >
-                      Print
-                    </Link>
-                  </td>
+          <div className="di-invoice-scroll">
+            <table className="di-invoice-table">
+              <thead>
+                <tr>
+                  <th className="check-col">
+                    <input
+                      type="checkbox"
+                      checked={allSelected}
+                      ref={(el) => {
+                        if (el) el.indeterminate = someSelected;
+                      }}
+                      onChange={toggleAll}
+                      aria-label="Select all invoices"
+                    />
+                  </th>
+                  <th>Invoice no</th>
+                  <th>Date</th>
+                  <th>Customer</th>
+                  <th className="num">Total</th>
+                  <th className="num">Balance</th>
+                  <th>HS Code</th>
+                  <th>Fiscal Invoice</th>
+                  <th>PRA status</th>
                 </tr>
-              );
-            })}
-            {!qboInvoices.length && (
-              <tr>
-                <td colSpan={Math.max(qboColumns.length + 3, 1)} style={{ color: 'var(--muted)' }}>
-                  {connected
-                    ? 'No invoices returned from QuickBooks.'
-                    : 'Connect QuickBooks to see live invoices here.'}
-                </td>
-              </tr>
-            )}
-          </tbody>
-        </table>
-      </div>
+              </thead>
+              <tbody>
+                {qboInvoices.map((inv) => {
+                  const id = String(inv.Id);
+                  const track = trackedByQboId.get(id);
+                  const fiscal =
+                    track?.fiscalInvoiceNo ||
+                    invoiceCustom(inv, 'Fiscal Invoice') ||
+                    invoiceCustom(inv, 'Fiscal Invoice No');
+                  const hs = invoiceCustom(inv, 'HS Code');
+                  const isSelected = Boolean(selected[id]);
+                  return (
+                    <tr
+                      key={id}
+                      className={`di-invoice-row${isSelected ? ' is-selected' : ''}`}
+                      onClick={() => navigate(`/app/invoices/${encodeURIComponent(id)}/print`)}
+                    >
+                      <td
+                        className="check-col"
+                        onClick={(e) => e.stopPropagation()}
+                      >
+                        <input
+                          type="checkbox"
+                          checked={isSelected}
+                          onChange={() => toggleOne(id)}
+                          aria-label={`Select invoice ${inv.DocNumber || id}`}
+                        />
+                      </td>
+                      <td className="mono">{inv.DocNumber || id}</td>
+                      <td>{inv.TxnDate || '—'}</td>
+                      <td>{inv.CustomerRef?.name || '—'}</td>
+                      <td className="num">{inv.TotalAmt ?? '—'}</td>
+                      <td className="num">{inv.Balance ?? '—'}</td>
+                      <td className="custom-cell">{hs === '—' ? '—' : hs}</td>
+                      <td className="custom-cell">
+                        {!fiscal || fiscal === '—' || fiscal === 'undefined'
+                          ? '—'
+                          : fiscal}
+                      </td>
+                      <td>
+                        <StatusBadge status={track?.status || 'PENDING'} />
+                      </td>
+                    </tr>
+                  );
+                })}
+                {!qboInvoices.length && (
+                  <tr>
+                    <td colSpan={9} className="empty-cell">
+                      No invoices returned from QuickBooks.
+                    </td>
+                  </tr>
+                )}
+              </tbody>
+            </table>
+          </div>
+        </div>
       )}
     </>
   );

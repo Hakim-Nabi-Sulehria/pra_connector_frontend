@@ -2,6 +2,7 @@ import { useEffect, useMemo, useState } from 'react';
 import { Link, useParams } from 'react-router-dom';
 import QRCode from 'qrcode';
 import { api } from '../lib/api';
+import { PageLoader } from '../components/PageLoader';
 
 function text(value: unknown, fallback = '—') {
   if (value === null || value === undefined || value === '') return fallback;
@@ -62,46 +63,44 @@ export function FiscalInvoiceReportPage() {
   const [fiscalInvoiceNo, setFiscalInvoiceNo] = useState('');
   const [qrDataUrl, setQrDataUrl] = useState('');
   const [loading, setLoading] = useState(true);
+  const [posting, setPosting] = useState(false);
   const [error, setError] = useState('');
+  const [msg, setMsg] = useState('');
+
+  async function load() {
+    setLoading(true);
+    setError('');
+    try {
+      const [qbo, companyResponse, tracked] = await Promise.all([
+        api('/customer/qbo/invoices?max=100'),
+        api('/customer/qbo/company'),
+        api('/customer/invoices'),
+      ]);
+      const found = (qbo?.invoices || []).find(
+        (candidate: any) => String(candidate?.Id) === String(id),
+      );
+      if (!found) throw new Error('Invoice was not found in QuickBooks.');
+
+      const trackedRow = (tracked || []).find(
+        (row: any) => String(row?.qboInvoiceId) === String(id),
+      );
+      const fiscal =
+        trackedRow?.fiscalInvoiceNo ||
+        customField(found, 'Fiscal Invoice') ||
+        customField(found, 'Fiscal Invoice No');
+
+      setInvoice(found);
+      setCompany(companyResponse?.company || companyResponse || null);
+      setFiscalInvoiceNo(String(fiscal || ''));
+    } catch (e: any) {
+      setError(e.message || 'Failed to load printable invoice.');
+    } finally {
+      setLoading(false);
+    }
+  }
 
   useEffect(() => {
-    let cancelled = false;
-    async function load() {
-      setLoading(true);
-      setError('');
-      try {
-        const [qbo, companyResponse, tracked] = await Promise.all([
-          api('/customer/qbo/invoices?max=100'),
-          api('/customer/qbo/company'),
-          api('/customer/invoices'),
-        ]);
-        if (cancelled) return;
-        const found = (qbo?.invoices || []).find(
-          (candidate: any) => String(candidate?.Id) === String(id),
-        );
-        if (!found) throw new Error('Invoice was not found in QuickBooks.');
-
-        const trackedRow = (tracked || []).find(
-          (row: any) => String(row?.qboInvoiceId) === String(id),
-        );
-        const fiscal =
-          trackedRow?.fiscalInvoiceNo ||
-          customField(found, 'Fiscal Invoice') ||
-          customField(found, 'Fiscal Invoice No');
-
-        setInvoice(found);
-        setCompany(companyResponse?.company || companyResponse || null);
-        setFiscalInvoiceNo(String(fiscal || ''));
-      } catch (e: any) {
-        if (!cancelled) setError(e.message || 'Failed to load printable invoice.');
-      } finally {
-        if (!cancelled) setLoading(false);
-      }
-    }
     load();
-    return () => {
-      cancelled = true;
-    };
   }, [id]);
 
   useEffect(() => {
@@ -127,14 +126,44 @@ export function FiscalInvoiceReportPage() {
     };
   }, [fiscalInvoiceNo]);
 
+  async function postToPra() {
+    if (!invoice?.Id) return;
+    setPosting(true);
+    setError('');
+    setMsg('');
+    try {
+      const result = await api('/customer/invoices/attach-fiscal', {
+        method: 'POST',
+        body: JSON.stringify({
+          qboInvoiceId: String(invoice.Id),
+          usin: invoice.DocNumber || String(invoice.Id),
+          customerName: invoice.CustomerRef?.name || undefined,
+          totalAmount: invoice.TotalAmt != null ? Number(invoice.TotalAmt) : undefined,
+          writeToQbo: true,
+        }),
+      });
+      setFiscalInvoiceNo(String(result.fiscalInvoiceNo || ''));
+      setMsg(
+        result.qboWriteVerified
+          ? 'Posted to PRA and fiscal number written back to QBO.'
+          : 'Posted to PRA. Check QBO custom field if write-back needs attention.',
+      );
+      await load();
+    } catch (e: any) {
+      setError(e.message || 'Failed to post invoice to PRA');
+    } finally {
+      setPosting(false);
+    }
+  }
+
   const lines = useMemo(() => salesLines(invoice), [invoice]);
   const companyAddress = addressLines(company?.CompanyAddr || company?.LegalAddr);
   const billAddress = addressLines(invoice?.BillAddr);
   const shipAddress = addressLines(invoice?.ShipAddr);
   const hsCode = customField(invoice, 'HS Code');
 
-  if (loading) return <p>Loading printable invoice…</p>;
-  if (error) return <div className="error-box">{error}</div>;
+  if (loading) return <PageLoader label="Preparing invoice preview…" />;
+  if (error && !invoice) return <div className="error-box">{error}</div>;
   if (!invoice) return null;
 
   return (
@@ -143,16 +172,32 @@ export function FiscalInvoiceReportPage() {
         <Link className="btn btn-ghost" to="/app/invoices">
           Back to invoices
         </Link>
-        <button
-          className="btn btn-primary"
-          onClick={() => {
-            document.title = `Invoice-${invoice.DocNumber || invoice.Id}`;
-            window.print();
-          }}
-        >
-          Print / Save PDF
-        </button>
+        <div className="report-actions-right">
+          <button
+            className="btn btn-primary"
+            disabled={posting}
+            onClick={postToPra}
+          >
+            {posting ? 'Posting…' : 'Post'}
+          </button>
+          <button
+            className="btn btn-ghost"
+            onClick={() => {
+              document.title = `Invoice-${invoice.DocNumber || invoice.Id}`;
+              window.print();
+            }}
+          >
+            Print
+          </button>
+        </div>
       </div>
+
+      {error && <div className="error-box no-print">{error}</div>}
+      {msg && (
+        <div className="card no-print" style={{ marginBottom: 14, color: 'var(--ok)' }}>
+          {msg}
+        </div>
+      )}
 
       <article className="fiscal-print-sheet">
         <header className="fiscal-report-header">
@@ -291,4 +336,3 @@ export function FiscalInvoiceReportPage() {
     </div>
   );
 }
-

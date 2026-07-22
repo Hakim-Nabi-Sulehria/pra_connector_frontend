@@ -1290,6 +1290,113 @@ textarea {
   height: 7px;
 }
 
+.invoice-toolbar-actions {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+  align-items: center;
+}
+
+.di-invoice-panel {
+  background: #fff;
+  border: 1px solid var(--line);
+  border-radius: 12px;
+  box-shadow: 0 8px 24px rgba(7, 27, 42, 0.06);
+  overflow: hidden;
+}
+
+.di-invoice-toolbar {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 12px;
+  padding: 10px 12px;
+  background: #f3f6f8;
+  border-bottom: 1px solid var(--line);
+  font-size: 0.78rem;
+  color: var(--muted);
+}
+
+.di-invoice-scroll {
+  overflow-x: auto;
+}
+
+.di-invoice-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.75rem;
+  line-height: 1.25;
+}
+
+.di-invoice-table thead th {
+  padding: 0.35rem 0.5rem;
+  background: #007a7e;
+  color: #fff;
+  font-weight: 600;
+  text-align: left;
+  white-space: nowrap;
+  position: sticky;
+  top: 0;
+  z-index: 1;
+}
+
+.di-invoice-table td {
+  padding: 0.28rem 0.5rem;
+  border-bottom: 1px solid #e8e8e8;
+  vertical-align: middle;
+  white-space: nowrap;
+}
+
+.di-invoice-table .num {
+  text-align: right;
+  font-variant-numeric: tabular-nums;
+}
+
+.di-invoice-table .mono {
+  font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+  font-size: 0.72rem;
+}
+
+.di-invoice-table .check-col {
+  width: 34px;
+}
+
+.di-invoice-table input[type='checkbox'] {
+  width: 0.94rem;
+  height: 0.94rem;
+  margin: 0;
+  accent-color: #007a7e;
+  cursor: pointer;
+}
+
+.di-invoice-row {
+  cursor: pointer;
+  transition: background 0.12s ease;
+}
+
+.di-invoice-row:nth-child(odd) {
+  background: rgba(15, 118, 110, 0.03);
+}
+
+.di-invoice-row:hover {
+  background: rgba(0, 132, 137, 0.08);
+}
+
+.di-invoice-row.is-selected {
+  background: #d0e2f3;
+}
+
+.di-invoice-table .custom-cell {
+  background: rgba(20, 184, 166, 0.1);
+  font-weight: 600;
+}
+
+.di-invoice-table .empty-cell {
+  padding: 24px 12px;
+  color: var(--muted);
+  text-align: center;
+}
+
 .fiscal-report-page {
   max-width: 980px;
   margin: 0 auto;
@@ -1297,9 +1404,16 @@ textarea {
 
 .report-actions {
   display: flex;
-  justify-content: flex-end;
+  justify-content: space-between;
+  align-items: center;
   gap: 10px;
   margin-bottom: 14px;
+}
+
+.report-actions-right {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
 }
 
 .fiscal-print-sheet {
