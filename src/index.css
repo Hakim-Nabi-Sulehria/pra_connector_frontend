@@ -1618,6 +1618,43 @@ textarea {
   table-layout: fixed;
 }
 
+.fiscal-lines-wrap {
+  width: 100%;
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+}
+
+.fiscal-pra-lines {
+  min-width: 920px;
+  font-size: 10px;
+}
+
+.fiscal-pra-lines th,
+.fiscal-pra-lines td {
+  padding: 6px 4px;
+  font-size: 10px;
+  line-height: 1.25;
+}
+
+.fiscal-pra-lines th {
+  font-size: 8px;
+  letter-spacing: 0.02em;
+  white-space: nowrap;
+}
+
+.fiscal-pra-lines th:nth-child(1) {
+  width: 28px;
+}
+
+.fiscal-pra-lines th:nth-child(3) {
+  width: 18%;
+}
+
+.fiscal-pra-lines .mono {
+  font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+  font-size: 9px;
+}
+
 .fiscal-lines-table th,
 .fiscal-lines-table td {
   padding: 9px 7px;
@@ -1687,8 +1724,8 @@ textarea {
 
 @media print {
   @page {
-    size: A4 portrait;
-    margin: 12mm;
+    size: A4 landscape;
+    margin: 8mm;
   }
 
   html,
@@ -1722,7 +1759,7 @@ textarea {
     max-width: 100% !important;
     min-height: 0;
     /* Keep content inside printable area even if browser margins are set to Minimum */
-    padding: 10mm 8mm !important;
+    padding: 6mm 5mm !important;
     border: 0;
     border-radius: 0;
     box-shadow: none;
@@ -1758,8 +1795,29 @@ textarea {
     background: transparent !important;
   }
 
-  .fiscal-lines-table {
+  .fiscal-lines-wrap {
+    overflow: visible !important;
+  }
+
+  .fiscal-lines-table,
+  .fiscal-pra-lines {
     width: 100% !important;
+    min-width: 0 !important;
+    table-layout: fixed !important;
+  }
+
+  .fiscal-pra-lines th,
+  .fiscal-pra-lines td {
+    padding: 3px 2px !important;
+    font-size: 7pt !important;
+  }
+
+  .fiscal-pra-lines th {
+    font-size: 6.5pt !important;
+  }
+
+  .fiscal-pra-lines .mono {
+    font-size: 6.5pt !important;
   }
 
   .fiscal-lines-table th {

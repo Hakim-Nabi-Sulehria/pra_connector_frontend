@@ -2,6 +2,13 @@ import { useEffect, useMemo, useState } from 'react';
 import { Link, useNavigate, useParams } from 'react-router-dom';
 import { api } from '../lib/api';
 import { PageLoader } from '../components/PageLoader';
+import {
+  addressLines,
+  buildPraLines,
+  fmtPct,
+  fmtQty,
+  sumPraLines,
+} from '../lib/pra-invoice-lines';
 
 function text(value: unknown, fallback = '—') {
   if (value === null || value === undefined || value === '') return fallback;
@@ -35,106 +42,6 @@ function customField(invoice: any, name: string) {
     match?.BooleanValue;
   if (value === null || value === undefined || value === '') return '';
   return String(value);
-}
-
-function addressLines(address: any) {
-  if (!address) return [];
-  return [
-    address.Line1,
-    address.Line2,
-    address.Line3,
-    [address.City, address.CountrySubDivisionCode, address.PostalCode]
-      .filter(Boolean)
-      .join(', '),
-    address.Country,
-  ]
-    .map((line) => String(line || '').trim())
-    .filter(Boolean);
-}
-
-function salesLines(invoice: any) {
-  return (invoice?.Line || []).filter(
-    (line: any) => line?.DetailType === 'SalesItemLineDetail',
-  );
-}
-
-function lineCustomField(line: any, name: string) {
-  const match = (line?.CustomField || []).find(
-    (field: any) => String(field?.Name || '').toLowerCase() === name.toLowerCase(),
-  );
-  const value =
-    match?.StringValue ??
-    match?.NumberValue ??
-    match?.DateValue ??
-    match?.BooleanValue;
-  if (value === null || value === undefined || value === '') return null;
-  return value;
-}
-
-function num(value: unknown, fallback = 0) {
-  const n = Number(value);
-  return Number.isFinite(n) ? n : fallback;
-}
-
-function fmtQty(value: unknown) {
-  const n = num(value, 0);
-  return new Intl.NumberFormat('en-PK', {
-    minimumFractionDigits: 0,
-    maximumFractionDigits: 2,
-  }).format(n);
-}
-
-function fmtPct(value: unknown) {
-  return `${fmtQty(value)}%`;
-}
-
-type PraLineRow = {
-  id: string;
-  itemCode: string;
-  itemName: string;
-  qty: number;
-  pctCode: string | null;
-  taxRate: number;
-  saleValue: number;
-  taxCharged: number;
-  discount: number;
-  furtherTax: number;
-  totalAmount: number;
-  invoiceType: number;
-  refUsin: string | null;
-};
-
-function buildPraLines(invoice: any): PraLineRow[] {
-  const taxRate = num(
-    invoice?.TxnTaxDetail?.TaxLine?.[0]?.TaxLineDetail?.TaxPercent,
-    0,
-  );
-  return salesLines(invoice).map((line: any, index: number) => {
-    const detail = line.SalesItemLineDetail || {};
-    const saleValue = num(line.Amount, 0);
-    const taxCharged = Math.round(saleValue * (taxRate / 100) * 100) / 100;
-    const discount = 0;
-    const furtherTax = 0;
-    const pct =
-      lineCustomField(line, 'PCTCode') ??
-      lineCustomField(line, 'PCT Code') ??
-      lineCustomField(line, 'HS Code');
-    return {
-      id: String(line.Id || index),
-      itemCode: text(detail.ItemRef?.value, ''),
-      itemName: text(detail.ItemRef?.name, line.Description || ''),
-      qty: num(detail.Qty, 0),
-      pctCode: pct == null || pct === '' ? null : String(pct),
-      taxRate,
-      saleValue,
-      taxCharged,
-      discount,
-      furtherTax,
-      totalAmount: Math.round((saleValue + taxCharged + furtherTax - discount) * 100) / 100,
-      invoiceType: 1,
-      refUsin: null,
-    };
-  });
 }
 
 function StatusChip({ status }: { status?: string }) {
@@ -236,27 +143,7 @@ export function InvoiceDetailPage() {
   }
 
   const praLines = useMemo(() => buildPraLines(invoice), [invoice]);
-  const lineTotals = useMemo(() => {
-    return praLines.reduce(
-      (acc, row) => {
-        acc.qty += row.qty;
-        acc.saleValue += row.saleValue;
-        acc.taxCharged += row.taxCharged;
-        acc.discount += row.discount;
-        acc.furtherTax += row.furtherTax;
-        acc.totalAmount += row.totalAmount;
-        return acc;
-      },
-      {
-        qty: 0,
-        saleValue: 0,
-        taxCharged: 0,
-        discount: 0,
-        furtherTax: 0,
-        totalAmount: 0,
-      },
-    );
-  }, [praLines]);
+  const lineTotals = useMemo(() => sumPraLines(praLines), [praLines]);
   const billAddress = addressLines(invoice?.BillAddr);
   const shipAddress = addressLines(invoice?.ShipAddr);
   const fiscalNo =

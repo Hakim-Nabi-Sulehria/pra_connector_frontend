@@ -3,6 +3,13 @@ import { Link, useParams } from 'react-router-dom';
 import QRCode from 'qrcode';
 import { api } from '../lib/api';
 import { PageLoader } from '../components/PageLoader';
+import {
+  addressLines,
+  buildPraLines,
+  fmtPct,
+  fmtQty,
+  sumPraLines,
+} from '../lib/pra-invoice-lines';
 
 function text(value: unknown, fallback = '—') {
   if (value === null || value === undefined || value === '') return fallback;
@@ -35,24 +42,6 @@ function customField(invoice: any, name: string) {
     match?.DateValue ??
     match?.BooleanValue ??
     ''
-  );
-}
-
-function addressLines(address: any) {
-  if (!address) return [];
-  const lines = [
-    address.Line1,
-    address.Line2,
-    address.Line3,
-    [address.City, address.CountrySubDivisionCode, address.PostalCode].filter(Boolean).join(', '),
-    address.Country,
-  ];
-  return lines.map((line) => String(line || '').trim()).filter(Boolean);
-}
-
-function salesLines(invoice: any) {
-  return (invoice?.Line || []).filter(
-    (line: any) => line?.DetailType === 'SalesItemLineDetail',
   );
 }
 
@@ -156,10 +145,12 @@ export function FiscalInvoiceReportPage() {
     }
   }
 
-  const lines = useMemo(() => salesLines(invoice), [invoice]);
+  const praLines = useMemo(() => buildPraLines(invoice), [invoice]);
+  const lineTotals = useMemo(() => sumPraLines(praLines), [praLines]);
+  const customerName = invoice?.CustomerRef?.name;
   const companyAddress = addressLines(company?.CompanyAddr || company?.LegalAddr);
-  const billAddress = addressLines(invoice?.BillAddr);
-  const shipAddress = addressLines(invoice?.ShipAddr);
+  const billAddress = addressLines(invoice?.BillAddr, [customerName]);
+  const shipAddress = addressLines(invoice?.ShipAddr, [customerName]);
   const hsCode = customField(invoice, 'HS Code');
 
   if (loading) return <PageLoader label="Preparing invoice preview…" />;
@@ -228,14 +219,14 @@ export function FiscalInvoiceReportPage() {
         <section className="fiscal-address-grid">
           <div>
             <span className="report-label">Bill to</span>
-            <strong>{text(invoice?.CustomerRef?.name)}</strong>
+            <strong>{text(customerName)}</strong>
             {billAddress.map((line) => (
               <p key={line}>{line}</p>
             ))}
           </div>
           <div>
             <span className="report-label">Ship to</span>
-            <strong>{text(invoice?.CustomerRef?.name)}</strong>
+            <strong>{text(customerName)}</strong>
             {shipAddress.map((line) => (
               <p key={line}>{line}</p>
             ))}
@@ -278,33 +269,53 @@ export function FiscalInvoiceReportPage() {
           </div>
         </section>
 
-        <table className="fiscal-lines-table">
-          <thead>
-            <tr>
-              <th>#</th>
-              <th>Product or service</th>
-              <th>Description</th>
-              <th className="num">Qty</th>
-              <th className="num">Rate</th>
-              <th className="num">Amount</th>
-            </tr>
-          </thead>
-          <tbody>
-            {lines.map((line: any, index: number) => {
-              const detail = line.SalesItemLineDetail || {};
-              return (
-                <tr key={line.Id || index}>
+        <div className="fiscal-lines-wrap">
+          <table className="fiscal-lines-table fiscal-pra-lines">
+            <thead>
+              <tr>
+                <th>#</th>
+                <th>Item no</th>
+                <th>Item name</th>
+                <th className="num">Qty</th>
+                <th>PCT</th>
+                <th className="num">Tax %</th>
+                <th className="num">Sale val</th>
+                <th className="num">Total</th>
+                <th className="num">Tax</th>
+                <th className="num">Disc.</th>
+                <th className="num">F.tax</th>
+                <th className="num">Type</th>
+                <th>Ref</th>
+              </tr>
+            </thead>
+            <tbody>
+              {praLines.map((row, index) => (
+                <tr key={row.id}>
                   <td>{index + 1}</td>
-                  <td>{text(detail.ItemRef?.name)}</td>
-                  <td>{text(line.Description)}</td>
-                  <td className="num">{text(detail.Qty, '0')}</td>
-                  <td className="num">{money(detail.UnitPrice)}</td>
-                  <td className="num">{money(line.Amount)}</td>
+                  <td className="mono">{text(row.itemCode, '—')}</td>
+                  <td>{text(row.itemName)}</td>
+                  <td className="num">{fmtQty(row.qty)}</td>
+                  <td className="mono">{row.pctCode ?? 'null'}</td>
+                  <td className="num">{fmtPct(row.taxRate)}</td>
+                  <td className="num">{money(row.saleValue)}</td>
+                  <td className="num">{money(row.totalAmount)}</td>
+                  <td className="num">{money(row.taxCharged)}</td>
+                  <td className="num">{money(row.discount)}</td>
+                  <td className="num">{money(row.furtherTax)}</td>
+                  <td className="num">{row.invoiceType}</td>
+                  <td className="mono">{row.refUsin ?? 'null'}</td>
                 </tr>
-              );
-            })}
-          </tbody>
-        </table>
+              ))}
+              {!praLines.length && (
+                <tr>
+                  <td colSpan={13} className="empty-cell">
+                    No sales lines on this invoice.
+                  </td>
+                </tr>
+              )}
+            </tbody>
+          </table>
+        </div>
 
         <section className="fiscal-report-footer">
           <div>
@@ -317,8 +328,28 @@ export function FiscalInvoiceReportPage() {
           </div>
           <dl>
             <div>
-              <dt>Subtotal</dt>
-              <dd>{money(invoice.TotalAmt)}</dd>
+              <dt>Total qty</dt>
+              <dd>{fmtQty(lineTotals.qty)}</dd>
+            </div>
+            <div>
+              <dt>Total sale value</dt>
+              <dd>{money(lineTotals.saleValue)}</dd>
+            </div>
+            <div>
+              <dt>Total sales tax</dt>
+              <dd>{money(lineTotals.taxCharged)}</dd>
+            </div>
+            <div>
+              <dt>Total disc.</dt>
+              <dd>{money(lineTotals.discount)}</dd>
+            </div>
+            <div>
+              <dt>Total further tax</dt>
+              <dd>{money(lineTotals.furtherTax)}</dd>
+            </div>
+            <div>
+              <dt>Total amt</dt>
+              <dd>{money(lineTotals.totalAmount)}</dd>
             </div>
             <div>
               <dt>Invoice total</dt>
