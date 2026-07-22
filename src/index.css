@@ -1483,7 +1483,7 @@ textarea {
 }
 
 .fiscal-report-page {
-  max-width: 980px;
+  max-width: 1120px;
   margin: 0 auto;
 }
 
@@ -1620,39 +1620,61 @@ textarea {
 
 .fiscal-lines-wrap {
   width: 100%;
-  overflow-x: auto;
-  -webkit-overflow-scrolling: touch;
+  max-width: 100%;
+  overflow: hidden;
 }
 
 .fiscal-pra-lines {
-  min-width: 920px;
-  font-size: 10px;
+  width: 100%;
+  min-width: 0;
+  font-size: 11px;
 }
+
+.fiscal-pra-lines col.col-idx { width: 3%; }
+.fiscal-pra-lines col.col-item-no { width: 6%; }
+.fiscal-pra-lines col.col-item-name { width: 16%; }
+.fiscal-pra-lines col.col-qty { width: 5%; }
+.fiscal-pra-lines col.col-sale { width: 11%; }
+.fiscal-pra-lines col.col-tax-pct { width: 7%; }
+.fiscal-pra-lines col.col-tax { width: 10%; }
+.fiscal-pra-lines col.col-ftax { width: 9%; }
+.fiscal-pra-lines col.col-total { width: 11%; }
+.fiscal-pra-lines col.col-pct { width: 6%; }
+.fiscal-pra-lines col.col-disc { width: 8%; }
+.fiscal-pra-lines col.col-type { width: 4%; }
+.fiscal-pra-lines col.col-ref { width: 4%; }
 
 .fiscal-pra-lines th,
 .fiscal-pra-lines td {
-  padding: 6px 4px;
-  font-size: 10px;
-  line-height: 1.25;
+  padding: 6px 3px;
+  font-size: 11px;
+  line-height: 1.2;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
 .fiscal-pra-lines th {
-  font-size: 8px;
-  letter-spacing: 0.02em;
+  font-size: 9px;
+  letter-spacing: 0.01em;
   white-space: nowrap;
 }
 
-.fiscal-pra-lines th:nth-child(1) {
-  width: 28px;
+.fiscal-pra-lines .item-name {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 
-.fiscal-pra-lines th:nth-child(3) {
-  width: 18%;
+.fiscal-pra-lines .num {
+  white-space: nowrap;
+  font-variant-numeric: tabular-nums;
+  font-size: 10.5px;
 }
 
 .fiscal-pra-lines .mono {
   font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
-  font-size: 9px;
+  font-size: 10px;
+  white-space: nowrap;
 }
 
 .fiscal-lines-table th,
@@ -1662,6 +1684,12 @@ textarea {
   vertical-align: top;
   text-align: left;
   overflow-wrap: anywhere;
+}
+
+.fiscal-pra-lines th,
+.fiscal-pra-lines td {
+  overflow-wrap: normal;
+  word-break: normal;
 }
 
 .fiscal-lines-table th {
@@ -1796,7 +1824,8 @@ textarea {
   }
 
   .fiscal-lines-wrap {
-    overflow: visible !important;
+    overflow: hidden !important;
+    max-width: 100% !important;
   }
 
   .fiscal-lines-table,
@@ -1808,16 +1837,18 @@ textarea {
 
   .fiscal-pra-lines th,
   .fiscal-pra-lines td {
-    padding: 3px 2px !important;
-    font-size: 7pt !important;
+    padding: 4px 2px !important;
+    font-size: 8.5pt !important;
   }
 
   .fiscal-pra-lines th {
-    font-size: 6.5pt !important;
+    font-size: 7.5pt !important;
   }
 
+  .fiscal-pra-lines .num,
   .fiscal-pra-lines .mono {
-    font-size: 6.5pt !important;
+    font-size: 8pt !important;
+    white-space: nowrap !important;
   }
 
   .fiscal-lines-table th {

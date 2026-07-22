@@ -25,6 +25,20 @@ function money(value: unknown) {
   }).format(Number.isFinite(amount) ? amount : 0);
 }
 
+/** Compact PKR for dense print columns (avoids "Rs" wrap). */
+function moneyCell(value: unknown) {
+  const amount = Number(value ?? 0);
+  return new Intl.NumberFormat('en-PK', {
+    minimumFractionDigits: 2,
+    maximumFractionDigits: 2,
+  }).format(Number.isFinite(amount) ? amount : 0);
+}
+
+function nullish(value: unknown) {
+  if (value === null || value === undefined || value === '') return '—';
+  return String(value);
+}
+
 function date(value: unknown) {
   if (!value) return '—';
   const parsed = new Date(String(value));
@@ -271,19 +285,34 @@ export function FiscalInvoiceReportPage() {
 
         <div className="fiscal-lines-wrap">
           <table className="fiscal-lines-table fiscal-pra-lines">
+            <colgroup>
+              <col className="col-idx" />
+              <col className="col-item-no" />
+              <col className="col-item-name" />
+              <col className="col-qty" />
+              <col className="col-sale" />
+              <col className="col-tax-pct" />
+              <col className="col-tax" />
+              <col className="col-ftax" />
+              <col className="col-total" />
+              <col className="col-pct" />
+              <col className="col-disc" />
+              <col className="col-type" />
+              <col className="col-ref" />
+            </colgroup>
             <thead>
               <tr>
                 <th>#</th>
                 <th>Item no</th>
                 <th>Item name</th>
                 <th className="num">Qty</th>
-                <th>PCT</th>
-                <th className="num">Tax %</th>
                 <th className="num">Sale val</th>
-                <th className="num">Total</th>
+                <th className="num">Tax %</th>
                 <th className="num">Tax</th>
-                <th className="num">Disc.</th>
                 <th className="num">F.tax</th>
+                <th className="num">Total</th>
+                <th>PCT</th>
+                <th className="num">Disc.</th>
                 <th className="num">Type</th>
                 <th>Ref</th>
               </tr>
@@ -293,17 +322,17 @@ export function FiscalInvoiceReportPage() {
                 <tr key={row.id}>
                   <td>{index + 1}</td>
                   <td className="mono">{text(row.itemCode, '—')}</td>
-                  <td>{text(row.itemName)}</td>
+                  <td className="item-name">{text(row.itemName)}</td>
                   <td className="num">{fmtQty(row.qty)}</td>
-                  <td className="mono">{row.pctCode ?? 'null'}</td>
+                  <td className="num">{moneyCell(row.saleValue)}</td>
                   <td className="num">{fmtPct(row.taxRate)}</td>
-                  <td className="num">{money(row.saleValue)}</td>
-                  <td className="num">{money(row.totalAmount)}</td>
-                  <td className="num">{money(row.taxCharged)}</td>
-                  <td className="num">{money(row.discount)}</td>
-                  <td className="num">{money(row.furtherTax)}</td>
+                  <td className="num">{moneyCell(row.taxCharged)}</td>
+                  <td className="num">{moneyCell(row.furtherTax)}</td>
+                  <td className="num">{moneyCell(row.totalAmount)}</td>
+                  <td className="mono">{nullish(row.pctCode)}</td>
+                  <td className="num">{moneyCell(row.discount)}</td>
                   <td className="num">{row.invoiceType}</td>
-                  <td className="mono">{row.refUsin ?? 'null'}</td>
+                  <td className="mono">{nullish(row.refUsin)}</td>
                 </tr>
               ))}
               {!praLines.length && (
