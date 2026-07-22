@@ -1351,6 +1351,7 @@ export function CustomerInvoicesPage() {
   const [error, setError] = useState('');
   const [busy, setBusy] = useState(false);
   const [connected, setConnected] = useState(false);
+  const [loaded, setLoaded] = useState(false);
 
   async function load() {
     setBusy(true);
@@ -1358,21 +1359,22 @@ export function CustomerInvoicesPage() {
     try {
       const conn = await api('/customer/connections');
       const isConnected = conn?.qbo?.status === 'CONNECTED';
-      setConnected(isConnected);
 
       const trackedRows = await api('/customer/invoices');
-      setTracked(trackedRows || []);
-
+      let nextInvoices: any[] = [];
       if (isConnected) {
         const qbo = await api('/customer/qbo/invoices?max=25');
-        setQboInvoices(qbo.invoices || []);
-      } else {
-        setQboInvoices([]);
+        nextInvoices = qbo.invoices || [];
       }
+
+      setConnected(isConnected);
+      setTracked(trackedRows || []);
+      setQboInvoices(nextInvoices);
     } catch (e: any) {
       setError(e.message);
     } finally {
       setBusy(false);
+      setLoaded(true);
     }
   }
 
@@ -1395,6 +1397,10 @@ export function CustomerInvoicesPage() {
     [qboColumns],
   );
 
+  if (!loaded) {
+    return <PageLoader label="Syncing QuickBooks invoices…" />;
+  }
+
   return (
     <>
       <div className="topbar">
@@ -1406,20 +1412,33 @@ export function CustomerInvoicesPage() {
           </p>
         </div>
         <button className="btn btn-ghost" disabled={busy} onClick={load}>
-          {busy ? 'Refreshing…' : 'Refresh'}
+          {busy ? (
+            <span className="btn-loading">
+              <span className="btn-loading-dot" />
+              Refreshing
+            </span>
+          ) : (
+            'Refresh'
+          )}
         </button>
       </div>
 
       {error && <div className="error-box">{error}</div>}
 
-      {!connected && (
+      {busy && (
+        <div className="card" style={{ marginBottom: 16 }}>
+          <PageLoader label="Refreshing invoice payload…" />
+        </div>
+      )}
+
+      {!busy && !connected && (
         <div className="card" style={{ marginBottom: 16 }}>
           QuickBooks is not connected.{' '}
           <Link to="/app/connections">Connect QuickBooks</Link> to load invoices.
         </div>
       )}
 
-      {connected && (
+      {!busy && connected && (
         <div className="card" style={{ marginBottom: 16 }}>
           <strong>{qboInvoices.length}</strong> invoice(s) ·{' '}
           <strong>{qboColumns.length}</strong> columns ·{' '}
@@ -1432,7 +1451,7 @@ export function CustomerInvoicesPage() {
                 </code>
               ))}
             </div>
-          ) : (
+          ) : qboInvoices.length > 0 ? (
             <div style={{ marginTop: 8, color: 'var(--warn)', maxWidth: 900 }}>
               No CustomField values in the Invoice REST API response. QBO has two custom-field
               systems: <strong>legacy sales-form fields</strong> (max 3, API-readable/writable) vs{' '}
@@ -1441,10 +1460,11 @@ export function CustomerInvoicesPage() {
               fields under Account and settings → Sales → Sales form content, keep them visible
               (not Hidden), then Refresh. Fiscal write-back also requires those legacy fields.
             </div>
-          )}
+          ) : null}
         </div>
       )}
 
+      {!busy && (
       <div className="card table-wrap">
         <h3 style={{ marginTop: 0 }}>QuickBooks invoices (full API payload)</h3>
         <table className="table qbo-wide-table">
@@ -1507,6 +1527,7 @@ export function CustomerInvoicesPage() {
           </tbody>
         </table>
       </div>
+      )}
     </>
   );
 }
