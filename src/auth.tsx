@@ -67,6 +67,9 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   }, [refresh]);
 
   const login = useCallback(async (p: Portal, email: string, password: string, captcha?: string) => {
+    // Always wipe prior session before binding a new tenant user.
+    clearSession();
+    setUser(null);
     const path = p === 'admin' ? '/auth/admin/login' : '/auth/customer/login';
     const res = await api<{ accessToken: string; user: User }>(path, {
       method: 'POST',
