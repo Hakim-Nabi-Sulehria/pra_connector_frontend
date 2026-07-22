@@ -26,6 +26,7 @@ import {
 } from './pages/AdminCompanies';
 import { AdminQboConfigPage } from './pages/AdminQboConfig';
 import { FiscalInvoiceReportPage } from './pages/FiscalInvoiceReport';
+import { InvoiceDetailPage } from './pages/InvoiceDetail';
 import { PrivacyPage, TermsPage } from './pages/LegalPages';
 
 function Guard({ portal }: { portal: 'admin' | 'customer' }) {
@@ -75,6 +76,7 @@ export default function App() {
             <Route path="mappings" element={<CustomerMappingsPage />} />
             <Route path="branches" element={<CustomerBranchesPage />} />
             <Route path="invoices" element={<CustomerInvoicesPage />} />
+            <Route path="invoices/:id" element={<InvoiceDetailPage />} />
             <Route path="invoices/:id/print" element={<FiscalInvoiceReportPage />} />
             <Route path="logs" element={<CustomerLogsPage />} />
           </Route>

@@ -169,8 +169,8 @@ export function FiscalInvoiceReportPage() {
   return (
     <div className="fiscal-report-page">
       <div className="report-actions no-print">
-        <Link className="btn btn-ghost" to="/app/invoices">
-          Back to invoices
+        <Link className="btn btn-ghost" to={`/app/invoices/${encodeURIComponent(String(id || invoice.Id))}`}>
+          Back to invoice
         </Link>
         <div className="report-actions-right">
           <button

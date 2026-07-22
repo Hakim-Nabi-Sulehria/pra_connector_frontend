@@ -1574,7 +1574,7 @@ export function CustomerInvoicesPage() {
                     <tr
                       key={id}
                       className={`di-invoice-row${isSelected ? ' is-selected' : ''}`}
-                      onClick={() => navigate(`/app/invoices/${encodeURIComponent(id)}/print`)}
+                      onClick={() => navigate(`/app/invoices/${encodeURIComponent(id)}`)}
                     >
                       <td
                         className="check-col"
