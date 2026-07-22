@@ -993,6 +993,50 @@ function buildValueLookup(header: any[], lines: any[]) {
   return map;
 }
 
+const PRA_HEADER_ORDER = [
+  'InvoiceNumber',
+  'POSID',
+  'USIN',
+  'DateTime',
+  'BuyerPNTN',
+  'BuyerCNIC',
+  'BuyerName',
+  'BuyerPhoneNumber',
+  'TotalBillAmount',
+  'TotalQuantity',
+  'TotalSaleValue',
+  'TotalTaxCharged',
+  'Discount',
+  'FurtherTax',
+  'PaymentMode',
+  'RefUSIN',
+  'InvoiceType',
+];
+
+const PRA_LINE_ORDER = [
+  'ItemCode',
+  'ItemName',
+  'Quantity',
+  'PCTCode',
+  'TaxRate',
+  'SaleValue',
+  'TotalAmount',
+  'TaxCharged',
+  'Discount',
+  'FurtherTax',
+  'InvoiceType',
+  'RefUSIN',
+];
+
+function sortRowsByPraOrder(rows: any[], order: string[]) {
+  const rank = new Map(order.map((key, idx) => [key, idx]));
+  return [...rows].sort((a, b) => {
+    const ao = rank.get(String(a.praKey)) ?? Number.MAX_SAFE_INTEGER;
+    const bo = rank.get(String(b.praKey)) ?? Number.MAX_SAFE_INTEGER;
+    return ao - bo;
+  });
+}
+
 function applyValueLookup(rows: any[], lookup: Record<string, any>) {
   return rows.map((r) => ({
     ...r,
@@ -1015,10 +1059,12 @@ export function CustomerMappingsPage() {
   const [saving, setSaving] = useState(false);
 
   function hydrate(data: any) {
+    const nextHeader = sortRowsByPraOrder(data.header || [], PRA_HEADER_ORDER);
+    const nextLines = sortRowsByPraOrder(data.lines || [], PRA_LINE_ORDER);
     setWorkspace(data);
-    setHeader(data.header || []);
-    setLines(data.lines || []);
-    setValueLookup(buildValueLookup(data.header || [], data.lines || []));
+    setHeader(nextHeader);
+    setLines(nextLines);
+    setValueLookup(buildValueLookup(nextHeader, nextLines));
     if (data.sample?.Id) setInvoiceId(data.sample.Id);
     setDirty(false);
   }
