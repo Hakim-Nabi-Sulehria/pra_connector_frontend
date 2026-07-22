@@ -25,7 +25,7 @@ export function AdminLayout() {
   const navigate = useNavigate();
 
   return (
-    <div className="portal-shell">
+    <div className="portal-shell admin-portal">
       <aside className="sidebar">
         <div className="brand">
           <div className="brand-mark">
@@ -41,14 +41,14 @@ export function AdminLayout() {
               end={l.end}
               className={({ isActive }) => `nav-link${isActive ? ' active' : ''}`}
             >
-              <l.icon size={18} />
+              <l.icon size={15} />
               {l.label}
             </NavLink>
           ))}
         </nav>
         <div className="sidebar-footer">
-          <div style={{ fontWeight: 700 }}>{user?.fullName}</div>
-          <div style={{ opacity: 0.7, marginBottom: 10 }}>{user?.email}</div>
+          <div className="sidebar-user-name">{user?.fullName}</div>
+          <div className="sidebar-user-email">{user?.email}</div>
           <button
             className="btn btn-ghost"
             style={{ width: '100%', color: '#fff', borderColor: 'rgba(255,255,255,.2)' }}
@@ -57,7 +57,7 @@ export function AdminLayout() {
               navigate('/admin/login');
             }}
           >
-            <LogOut size={16} style={{ marginRight: 8 }} />
+            <LogOut size={14} style={{ marginRight: 6 }} />
             Sign out
           </button>
         </div>
