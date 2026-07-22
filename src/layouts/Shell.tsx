@@ -25,7 +25,7 @@ export function AdminLayout() {
   const navigate = useNavigate();
 
   return (
-    <div className="portal-shell admin-portal">
+    <div className="portal-shell dense-portal">
       <aside className="sidebar">
         <div className="brand">
           <div className="brand-mark">
@@ -83,7 +83,7 @@ export function CustomerLayout() {
   const qboConnected = user?.organization?.qbo?.status === 'CONNECTED';
 
   return (
-    <div className="portal-shell">
+    <div className="portal-shell dense-portal">
       <aside className="sidebar">
         <div className="brand">
           <div className="brand-mark">
@@ -95,23 +95,21 @@ export function CustomerLayout() {
           {customerLinks
             .filter((l) => (l.to === '/app/mappings' ? qboConnected : true))
             .map((l) => (
-            <NavLink
-              key={l.to}
-              to={l.to}
-              end={l.end}
-              className={({ isActive }) => `nav-link${isActive ? ' active' : ''}`}
-            >
-              <l.icon size={18} />
-              {l.label}
-            </NavLink>
-          ))}
+              <NavLink
+                key={l.to}
+                to={l.to}
+                end={l.end}
+                className={({ isActive }) => `nav-link${isActive ? ' active' : ''}`}
+              >
+                <l.icon size={15} />
+                {l.label}
+              </NavLink>
+            ))}
         </nav>
         <div className="sidebar-footer">
-          <div style={{ fontWeight: 700 }}>{user?.fullName}</div>
-          <div style={{ opacity: 0.7, marginBottom: 4 }}>
-            {user?.organization?.name || 'Organization'}
-          </div>
-          <div style={{ opacity: 0.55, marginBottom: 10, fontSize: 12 }}>{user?.email}</div>
+          <div className="sidebar-user-name">{user?.fullName}</div>
+          <div className="sidebar-user-org">{user?.organization?.name || 'Organization'}</div>
+          <div className="sidebar-user-email">{user?.email}</div>
           <button
             className="btn btn-ghost"
             style={{ width: '100%', color: '#fff', borderColor: 'rgba(255,255,255,.2)' }}
@@ -120,7 +118,7 @@ export function CustomerLayout() {
               navigate('/login');
             }}
           >
-            <LogOut size={16} style={{ marginRight: 8 }} />
+            <LogOut size={14} style={{ marginRight: 6 }} />
             Sign out
           </button>
         </div>

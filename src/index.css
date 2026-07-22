@@ -830,7 +830,7 @@ textarea {
 }
 
 /* Super Admin — denser DI-inspired control plane */
-.admin-portal {
+.dense-portal {
   --admin-radius: 8px;
   --admin-control-h: 32px;
   --admin-font: 0.8125rem;
@@ -838,30 +838,30 @@ textarea {
   font-size: 0.875rem;
 }
 
-.admin-portal .sidebar {
+.dense-portal .sidebar {
   padding: 18px 12px;
   gap: 16px;
 }
 
-.admin-portal .brand {
+.dense-portal .brand {
   padding: 0 8px;
   gap: 2px;
 }
 
-.admin-portal .brand-mark {
+.dense-portal .brand-mark {
   font-size: 1.05rem;
 }
 
-.admin-portal .brand-sub {
+.dense-portal .brand-sub {
   font-size: 0.68rem;
   letter-spacing: 0.01em;
 }
 
-.admin-portal .nav-group {
+.dense-portal .nav-group {
   gap: 3px;
 }
 
-.admin-portal .nav-link {
+.dense-portal .nav-link {
   gap: 8px;
   padding: 8px 10px;
   border-radius: 8px;
@@ -870,96 +870,102 @@ textarea {
   line-height: 1.2;
 }
 
-.admin-portal .sidebar-footer {
+.dense-portal .sidebar-footer {
   padding: 10px;
   border-radius: 10px;
   font-size: 0.75rem;
 }
 
-.admin-portal .sidebar-user-name {
+.dense-portal .sidebar-user-name {
   font-weight: 700;
   font-size: 0.78rem;
 }
 
-.admin-portal .sidebar-user-email {
+.dense-portal .sidebar-user-org {
+  opacity: 0.72;
+  margin: 2px 0 0;
+  font-size: 0.7rem;
+}
+
+.dense-portal .sidebar-user-email {
   opacity: 0.7;
   margin-bottom: 8px;
   font-size: 0.7rem;
   word-break: break-all;
 }
 
-.admin-portal .main {
+.dense-portal .main {
   padding: 18px 20px;
 }
 
-.admin-portal .topbar {
+.dense-portal .topbar {
   margin-bottom: 14px;
   align-items: center;
   gap: 12px;
 }
 
-.admin-portal .topbar h1 {
+.dense-portal .topbar h1 {
   font-size: 1.2rem;
   letter-spacing: -0.02em;
 }
 
-.admin-portal .topbar p {
+.dense-portal .topbar p {
   margin: 3px 0 0;
   font-size: 0.78rem;
   line-height: 1.35;
 }
 
-.admin-portal .grid {
+.dense-portal .grid {
   gap: 12px;
 }
 
-.admin-portal .grid.kpi {
+.dense-portal .grid.kpi {
   grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
 }
 
-.admin-portal .card {
+.dense-portal .card {
   border-radius: 12px;
   padding: 12px 14px;
   box-shadow: 0 8px 24px rgba(7, 27, 42, 0.06);
 }
 
-.admin-portal .card h3 {
+.dense-portal .card h3 {
   margin: 0 0 8px;
   font-size: 0.88rem;
 }
 
-.admin-portal .kpi-label {
+.dense-portal .kpi-label {
   font-size: 0.72rem;
   margin-bottom: 4px;
   font-weight: 600;
 }
 
-.admin-portal .kpi-value {
+.dense-portal .kpi-value {
   font-size: 1.35rem;
   letter-spacing: -0.03em;
 }
 
-.admin-portal .badge {
+.dense-portal .badge {
   padding: 2px 8px;
   font-size: 0.68rem;
   border-radius: 999px;
 }
 
-.admin-portal .table {
+.dense-portal .table {
   font-size: 0.78rem;
 }
 
-.admin-portal .table th,
-.admin-portal .table td {
+.dense-portal .table th,
+.dense-portal .table td {
   padding: 8px 7px;
 }
 
-.admin-portal .table th {
+.dense-portal .table th {
   font-size: 0.68rem;
   letter-spacing: 0.03em;
 }
 
-.admin-portal .btn {
+.dense-portal .btn {
   border-radius: var(--admin-radius);
   padding: 0 12px;
   min-height: var(--admin-control-h);
@@ -972,28 +978,28 @@ textarea {
   box-shadow: none;
 }
 
-.admin-portal .btn-primary {
+.dense-portal .btn-primary {
   box-shadow: 0 4px 12px rgba(15, 118, 110, 0.22);
 }
 
-.admin-portal .btn-primary:hover:not(:disabled) {
+.dense-portal .btn-primary:hover:not(:disabled) {
   transform: none;
 }
 
-.admin-portal .field {
+.dense-portal .field {
   gap: 4px;
   margin-bottom: 10px;
 }
 
-.admin-portal .field label {
+.dense-portal .field label {
   font-size: 0.72rem;
   font-weight: 600;
   letter-spacing: 0.01em;
 }
 
-.admin-portal .field input,
-.admin-portal .field select,
-.admin-portal .field textarea {
+.dense-portal .field input,
+.dense-portal .field select,
+.dense-portal .field textarea {
   min-height: var(--admin-control-h);
   border-radius: var(--admin-radius);
   padding: 6px 10px;
@@ -1004,70 +1010,70 @@ textarea {
   transition: border-color 0.15s ease, box-shadow 0.15s ease;
 }
 
-.admin-portal .field textarea {
+.dense-portal .field textarea {
   min-height: 72px;
   padding-top: 8px;
 }
 
-.admin-portal .field input:focus,
-.admin-portal .field select:focus,
-.admin-portal .field textarea:focus {
+.dense-portal .field input:focus,
+.dense-portal .field select:focus,
+.dense-portal .field textarea:focus {
   box-shadow: 0 0 0 2px rgba(15, 118, 110, 0.14);
 }
 
-.admin-portal .field input::placeholder,
-.admin-portal .field textarea::placeholder {
+.dense-portal .field input::placeholder,
+.dense-portal .field textarea::placeholder {
   color: #8aa0b2;
   font-size: 0.78rem;
 }
 
-.admin-portal .field-hint {
+.dense-portal .field-hint {
   margin: 4px 0 0;
   font-size: 0.68rem;
 }
 
-.admin-portal .filter-bar {
+.dense-portal .filter-bar {
   gap: 10px;
 }
 
-.admin-portal .filter-grid {
+.dense-portal .filter-grid {
   gap: 10px;
   grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
 }
 
-.admin-portal .filter-actions {
+.dense-portal .filter-actions {
   gap: 6px;
 }
 
-.admin-portal .form-card {
+.dense-portal .form-card {
   max-width: 680px;
 }
 
-.admin-portal .form-actions {
+.dense-portal .form-actions {
   gap: 6px;
   margin-top: 4px;
 }
 
-.admin-portal .env-segment {
+.dense-portal .env-segment {
   padding: 3px;
   border-radius: 8px;
   gap: 3px;
 }
 
-.admin-portal .env-segment button {
+.dense-portal .env-segment button {
   padding: 6px 12px;
   border-radius: 6px;
   font-size: 0.75rem;
 }
 
-.admin-portal .error-box {
+.dense-portal .error-box {
   padding: 8px 10px;
   border-radius: 8px;
   margin-bottom: 10px;
   font-size: 0.78rem;
 }
 
-.admin-portal .progress {
+.dense-portal .progress {
   height: 7px;
 }
 
