@@ -2,6 +2,7 @@ import { useEffect, useMemo, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { api } from '../lib/api';
 import { useAuth } from '../auth';
+import { PageLoader } from '../components/PageLoader';
 import {
   collectCustomFieldNames,
   collectQboColumns,
@@ -449,7 +450,7 @@ export function CustomerDashboardPage() {
   useEffect(() => {
     api('/customer/dashboard').then(setData);
   }, []);
-  if (!data) return <p>Loading workspace…</p>;
+  if (!data) return <PageLoader label="Loading workspace…" />;
   const pct = Math.round((data.onboarding.completed / data.onboarding.total) * 100);
   const qboConnected = data.org?.qbo?.status === 'CONNECTED';
 
@@ -654,7 +655,7 @@ export function CustomerConnectionsPage() {
     load().catch((e) => setErr(e.message));
   }, []);
 
-  if (!data) return <p>Loading connections…</p>;
+  if (!data) return <PageLoader label="Loading connections…" />;
 
   return (
     <>
@@ -744,23 +745,25 @@ export function CustomerConnectionsPage() {
           <div className="step-list">
             <div className="step-item">
               <span>POS ID</span>
-              <strong style={{ fontFamily: 'ui-monospace, monospace', fontSize: 13 }}>
+              <strong className="step-value mono">
                 {data.pra?.posId || 'Not configured'}
               </strong>
             </div>
             <div className="step-item">
               <span>Environment</span>
-              <strong>{data.pra?.environment || 'sandbox'}</strong>
+              <strong className="step-value">{data.pra?.environment || 'sandbox'}</strong>
             </div>
-            <div className="step-item">
+            <div className="step-item step-item-stack">
               <span>API URL</span>
-              <strong style={{ fontSize: 12, textAlign: 'right', maxWidth: '60%' }}>
+              <strong className="step-value mono break-all">
                 {data.pra?.apiUrl || '—'}
               </strong>
             </div>
             <div className="step-item">
               <span>Token</span>
-              <strong>{data.pra?.hasToken ? 'Configured by admin' : 'Not configured'}</strong>
+              <strong className="step-value">
+                {data.pra?.hasToken ? 'Configured by admin' : 'Not configured'}
+              </strong>
             </div>
           </div>
           <p className="map-hint" style={{ marginTop: 12 }}>
@@ -1117,7 +1120,7 @@ export function CustomerMappingsPage() {
     }
   }
 
-  if (!workspace && !error) return <p>Loading field mappings…</p>;
+  if (!workspace && !error) return <PageLoader label="Loading field mappings…" />;
 
   return (
     <>

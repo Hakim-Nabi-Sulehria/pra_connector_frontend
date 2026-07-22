@@ -490,6 +490,70 @@ textarea {
   border: 1px solid var(--line);
 }
 
+.step-item > span:first-child {
+  flex-shrink: 0;
+  color: var(--muted);
+  font-size: 0.78rem;
+  font-weight: 600;
+}
+
+.step-item-stack {
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 6px;
+}
+
+.step-value {
+  font-size: 0.82rem;
+  text-align: right;
+  overflow-wrap: anywhere;
+}
+
+.step-item-stack .step-value {
+  text-align: left;
+  width: 100%;
+}
+
+.step-value.mono {
+  font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+  font-size: 0.75rem;
+  font-weight: 600;
+}
+
+.step-value.break-all {
+  word-break: break-all;
+}
+
+.page-loader {
+  display: flex;
+  min-height: 220px;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+  color: var(--muted);
+  font-size: 0.85rem;
+}
+
+.page-loader-spinner {
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  border: 2.5px solid rgba(15, 118, 110, 0.18);
+  border-top-color: var(--teal);
+  animation: page-loader-spin 0.75s linear infinite;
+}
+
+.page-loader p {
+  margin: 0;
+}
+
+@keyframes page-loader-spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
 .landing {
   min-height: 100vh;
   display: flex;
