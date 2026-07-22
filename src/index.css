@@ -1395,6 +1395,17 @@ textarea {
   overflow-x: auto;
 }
 
+.invoice-lines-scroll {
+  max-width: 100%;
+  overflow-x: auto;
+  overflow-y: hidden;
+  -webkit-overflow-scrolling: touch;
+}
+
+.invoice-pra-lines-table {
+  min-width: 1100px;
+}
+
 .di-invoice-table {
   width: 100%;
   border-collapse: collapse;

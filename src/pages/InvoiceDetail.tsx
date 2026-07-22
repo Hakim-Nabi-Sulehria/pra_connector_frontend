@@ -58,6 +58,85 @@ function salesLines(invoice: any) {
   );
 }
 
+function lineCustomField(line: any, name: string) {
+  const match = (line?.CustomField || []).find(
+    (field: any) => String(field?.Name || '').toLowerCase() === name.toLowerCase(),
+  );
+  const value =
+    match?.StringValue ??
+    match?.NumberValue ??
+    match?.DateValue ??
+    match?.BooleanValue;
+  if (value === null || value === undefined || value === '') return null;
+  return value;
+}
+
+function num(value: unknown, fallback = 0) {
+  const n = Number(value);
+  return Number.isFinite(n) ? n : fallback;
+}
+
+function fmtQty(value: unknown) {
+  const n = num(value, 0);
+  return new Intl.NumberFormat('en-PK', {
+    minimumFractionDigits: 0,
+    maximumFractionDigits: 2,
+  }).format(n);
+}
+
+function fmtPct(value: unknown) {
+  return `${fmtQty(value)}%`;
+}
+
+type PraLineRow = {
+  id: string;
+  itemCode: string;
+  itemName: string;
+  qty: number;
+  pctCode: string | null;
+  taxRate: number;
+  saleValue: number;
+  taxCharged: number;
+  discount: number;
+  furtherTax: number;
+  totalAmount: number;
+  invoiceType: number;
+  refUsin: string | null;
+};
+
+function buildPraLines(invoice: any): PraLineRow[] {
+  const taxRate = num(
+    invoice?.TxnTaxDetail?.TaxLine?.[0]?.TaxLineDetail?.TaxPercent,
+    0,
+  );
+  return salesLines(invoice).map((line: any, index: number) => {
+    const detail = line.SalesItemLineDetail || {};
+    const saleValue = num(line.Amount, 0);
+    const taxCharged = Math.round(saleValue * (taxRate / 100) * 100) / 100;
+    const discount = 0;
+    const furtherTax = 0;
+    const pct =
+      lineCustomField(line, 'PCTCode') ??
+      lineCustomField(line, 'PCT Code') ??
+      lineCustomField(line, 'HS Code');
+    return {
+      id: String(line.Id || index),
+      itemCode: text(detail.ItemRef?.value, ''),
+      itemName: text(detail.ItemRef?.name, line.Description || ''),
+      qty: num(detail.Qty, 0),
+      pctCode: pct == null || pct === '' ? null : String(pct),
+      taxRate,
+      saleValue,
+      taxCharged,
+      discount,
+      furtherTax,
+      totalAmount: Math.round((saleValue + taxCharged + furtherTax - discount) * 100) / 100,
+      invoiceType: 1,
+      refUsin: null,
+    };
+  });
+}
+
 function StatusChip({ status }: { status?: string }) {
   const s = (status || 'PENDING').toUpperCase();
   const cls =
@@ -156,7 +235,28 @@ export function InvoiceDetailPage() {
     }
   }
 
-  const lines = useMemo(() => salesLines(invoice), [invoice]);
+  const praLines = useMemo(() => buildPraLines(invoice), [invoice]);
+  const lineTotals = useMemo(() => {
+    return praLines.reduce(
+      (acc, row) => {
+        acc.qty += row.qty;
+        acc.saleValue += row.saleValue;
+        acc.taxCharged += row.taxCharged;
+        acc.discount += row.discount;
+        acc.furtherTax += row.furtherTax;
+        acc.totalAmount += row.totalAmount;
+        return acc;
+      },
+      {
+        qty: 0,
+        saleValue: 0,
+        taxCharged: 0,
+        discount: 0,
+        furtherTax: 0,
+        totalAmount: 0,
+      },
+    );
+  }, [praLines]);
   const billAddress = addressLines(invoice?.BillAddr);
   const shipAddress = addressLines(invoice?.ShipAddr);
   const fiscalNo =
@@ -261,35 +361,46 @@ export function InvoiceDetailPage() {
         </Section>
 
         <Section title="Line items">
-          <div className="di-invoice-scroll">
-            <table className="di-invoice-table">
+          <div className="di-invoice-scroll invoice-lines-scroll">
+            <table className="di-invoice-table invoice-pra-lines-table">
               <thead>
                 <tr>
                   <th>#</th>
-                  <th>Product / service</th>
-                  <th>Description</th>
+                  <th>Item no</th>
+                  <th>Item name</th>
                   <th className="num">Qty</th>
-                  <th className="num">Rate</th>
-                  <th className="num">Amount</th>
+                  <th>PCT</th>
+                  <th className="num">Sales tax %</th>
+                  <th className="num">Sale val</th>
+                  <th className="num">Total amt</th>
+                  <th className="num">Sales tax</th>
+                  <th className="num">Disc.</th>
+                  <th className="num">Further tax</th>
+                  <th className="num">Inv type</th>
+                  <th>Ref USIN</th>
                 </tr>
               </thead>
               <tbody>
-                {lines.map((line: any, index: number) => {
-                  const detail = line.SalesItemLineDetail || {};
-                  return (
-                    <tr key={line.Id || index} className="di-invoice-row">
-                      <td>{index + 1}</td>
-                      <td>{text(detail.ItemRef?.name)}</td>
-                      <td>{text(line.Description)}</td>
-                      <td className="num">{text(detail.Qty, '0')}</td>
-                      <td className="num">{money(detail.UnitPrice)}</td>
-                      <td className="num">{money(line.Amount)}</td>
-                    </tr>
-                  );
-                })}
-                {!lines.length && (
+                {praLines.map((row, index) => (
+                  <tr key={row.id} className="di-invoice-row">
+                    <td>{index + 1}</td>
+                    <td className="mono">{text(row.itemCode, '—')}</td>
+                    <td>{text(row.itemName)}</td>
+                    <td className="num">{fmtQty(row.qty)}</td>
+                    <td className="mono">{row.pctCode ?? 'null'}</td>
+                    <td className="num">{fmtPct(row.taxRate)}</td>
+                    <td className="num">{money(row.saleValue)}</td>
+                    <td className="num">{money(row.totalAmount)}</td>
+                    <td className="num">{money(row.taxCharged)}</td>
+                    <td className="num">{money(row.discount)}</td>
+                    <td className="num">{money(row.furtherTax)}</td>
+                    <td className="num">{row.invoiceType}</td>
+                    <td className="mono">{row.refUsin ?? 'null'}</td>
+                  </tr>
+                ))}
+                {!praLines.length && (
                   <tr>
-                    <td colSpan={6} className="empty-cell">
+                    <td colSpan={13} className="empty-cell">
                       No sales lines on this invoice.
                     </td>
                   </tr>
@@ -301,12 +412,18 @@ export function InvoiceDetailPage() {
 
         <Section title="Totals">
           <div className="invoice-detail-fields totals-grid">
-            <Field label="Subtotal / Invoice total" value={money(invoice.TotalAmt)} />
+            <Field label="Total qty" value={fmtQty(lineTotals.qty)} />
+            <Field label="Total sale value" value={money(lineTotals.saleValue)} />
+            <Field label="Total sales tax" value={money(lineTotals.taxCharged)} />
+            <Field label="Total disc." value={money(lineTotals.discount)} />
+            <Field label="Total further tax" value={money(lineTotals.furtherTax)} />
+            <Field label="Total amt" value={money(lineTotals.totalAmount)} />
+            <Field label="Invoice total (QBO)" value={money(invoice.TotalAmt)} />
             <Field label="Balance due" value={money(invoice.Balance)} />
-            <Field
-              label="Customer memo"
-              value={text(invoice.CustomerMemo?.value)}
-            />
+            <Field label="Payment mode" value="1" />
+            <Field label="Inv type" value="1" />
+            <Field label="Ref USIN" value="null" />
+            <Field label="Customer memo" value={text(invoice.CustomerMemo?.value)} />
           </div>
         </Section>
       </div>
