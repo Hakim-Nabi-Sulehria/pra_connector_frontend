@@ -1,7 +1,8 @@
 import { type FormEvent, useEffect, useState } from 'react';
 import { Link, Navigate, useNavigate, useSearchParams } from 'react-router-dom';
 import { useAuth } from '../auth';
-import { api } from '../lib/api';
+import { api, type IntegrationMode } from '../lib/api';
+import { IntegrationModeLoginTabs } from '../components/IntegrationModeTabs';
 
 export function LandingPage() {
   return (
@@ -23,18 +24,25 @@ export function LandingPage() {
         <h1>
           Fiscal sync that <em>runs itself</em>
         </h1>
-        <p>
-          Connect QuickBooks Online once, map PRA fields, and let the background engine post,
-          retry, and audit every invoice — without spreadsheet babysitting.
+          <p>
+          Connect QuickBooks Online once, map PRA fields or post FBR DI invoices — two fully
+          isolated integration modes.
         </p>
         <div className="landing-actions">
           <Link className="btn btn-primary" to="/register">
             Start onboarding
           </Link>
           <Link className="btn btn-ghost" to="/login">
-            Enter workspace
+            PRA workspace
+          </Link>
+          <Link className="btn btn-ghost" to="/login">
+            FBR workspace
           </Link>
         </div>
+        <p className="map-hint" style={{ marginTop: 12 }}>
+          On login, choose the <strong>PRA</strong> or <strong>FBR</strong> tab — records never
+          mix between modes.
+        </p>
         <p className="legal-links">
           <Link to="/terms">Terms</Link> · <Link to="/privacy">Privacy</Link>
         </p>
@@ -77,22 +85,25 @@ function AuthShell({
 }
 
 export function AdminLoginPage() {
-  const { login, user, portal, loading } = useAuth();
+  const { login, user, portal, integrationMode, loading } = useAuth();
   const navigate = useNavigate();
+  const [mode, setMode] = useState<IntegrationMode>('PRA');
   const [email, setEmail] = useState('admin@praconnector.com');
   const [password, setPassword] = useState('Admin@12345');
   const [error, setError] = useState('');
   const [busy, setBusy] = useState(false);
 
-  if (!loading && user && portal === 'admin') return <Navigate to="/admin" replace />;
+  if (!loading && user && portal === 'admin' && integrationMode === mode) {
+    return <Navigate to={mode === 'FBR' ? '/admin/fbr' : '/admin'} replace />;
+  }
 
   async function onSubmit(e: FormEvent) {
     e.preventDefault();
     setBusy(true);
     setError('');
     try {
-      await login('admin', email, password);
-      navigate('/admin');
+      await login('admin', email, password, mode);
+      navigate(mode === 'FBR' ? '/admin/fbr' : '/admin');
     } catch (err: any) {
       setError(err.message || 'Login failed');
     } finally {
@@ -103,10 +114,11 @@ export function AdminLoginPage() {
   return (
     <AuthShell
       title="Super Admin access"
-      hint="Platform control plane — organizations, traffic, and audit."
+      hint={`Platform control plane — ${mode} organizations, traffic, and audit.`}
       visualTitle="Operate the network"
       visualBody="Monitor every tenant connection, fiscal post success rate, and integration health from one command surface."
     >
+      <IntegrationModeLoginTabs mode={mode} onChange={setMode} />
       <form onSubmit={onSubmit}>
         {error && <div className="error-box">{error}</div>}
         <div className="field">
@@ -134,8 +146,9 @@ export function AdminLoginPage() {
 }
 
 export function CustomerLoginPage() {
-  const { login, user, portal, loading } = useAuth();
+  const { login, user, portal, integrationMode, loading } = useAuth();
   const navigate = useNavigate();
+  const [mode, setMode] = useState<IntegrationMode>('PRA');
   const [email, setEmail] = useState('demo@fenzi.com');
   const [password, setPassword] = useState('Demo@12345');
   const [error, setError] = useState('');
@@ -148,7 +161,9 @@ export function CustomerLoginPage() {
   const [captchaInput, setCaptchaInput] = useState('');
   const captchaOk = captchaInput.trim() === String(captcha.a + captcha.b);
 
-  if (!loading && user && portal === 'customer') return <Navigate to="/app" replace />;
+  if (!loading && user && portal === 'customer' && integrationMode === mode) {
+    return <Navigate to={mode === 'FBR' ? '/fbr/app' : '/app'} replace />;
+  }
 
   async function onSubmit(e: FormEvent) {
     e.preventDefault();
@@ -159,8 +174,8 @@ export function CustomerLoginPage() {
     setBusy(true);
     setError('');
     try {
-      await login('customer', email, password, captchaInput);
-      navigate('/app');
+      await login('customer', email, password, mode, captchaInput);
+      navigate(mode === 'FBR' ? '/fbr/app' : '/app');
     } catch (err: any) {
       setError(err.message || 'Login failed');
     } finally {
@@ -171,10 +186,19 @@ export function CustomerLoginPage() {
   return (
     <AuthShell
       title="Customer workspace"
-      hint="Connect QuickBooks, configure PRA, and watch invoices fiscalize."
+      hint={
+        mode === 'FBR'
+          ? 'Connect QuickBooks, configure FBR DI, validate and post invoices.'
+          : 'Connect QuickBooks, configure PRA, and watch invoices fiscalize.'
+      }
       visualTitle="Set it once"
-      visualBody="Onboard your company, wire QBO + PRA, then let the integration service own retries, logs, and compliance traffic."
+      visualBody={
+        mode === 'FBR'
+          ? 'Onboard your company, wire QBO + FBR DI API, validate then post for FBR invoice numbers.'
+          : 'Onboard your company, wire QBO + PRA, then let the integration service own retries, logs, and compliance traffic.'
+      }
     >
+      <IntegrationModeLoginTabs mode={mode} onChange={setMode} />
       <form onSubmit={onSubmit}>
         {error && <div className="error-box">{error}</div>}
         <div className="field">
@@ -239,9 +263,26 @@ export function CustomerLoginPage() {
   );
 }
 
-export function RegisterPage() {
-  const { register, user, portal, loading } = useAuth();
+export function FbrAdminLoginPage() {
   const navigate = useNavigate();
+  useEffect(() => {
+    navigate('/admin/login', { replace: true });
+  }, [navigate]);
+  return null;
+}
+
+export function FbrCustomerLoginPage() {
+  const navigate = useNavigate();
+  useEffect(() => {
+    navigate('/login', { replace: true });
+  }, [navigate]);
+  return null;
+}
+
+export function RegisterPage() {
+  const { register, user, portal, integrationMode, loading } = useAuth();
+  const navigate = useNavigate();
+  const [mode, setMode] = useState<IntegrationMode>('PRA');
   const [form, setForm] = useState({
     fullName: '',
     email: '',
@@ -252,15 +293,17 @@ export function RegisterPage() {
   const [error, setError] = useState('');
   const [busy, setBusy] = useState(false);
 
-  if (!loading && user && portal === 'customer') return <Navigate to="/app" replace />;
+  if (!loading && user && portal === 'customer') {
+    return <Navigate to={integrationMode === 'FBR' ? '/fbr/app' : '/app'} replace />;
+  }
 
   async function onSubmit(e: FormEvent) {
     e.preventDefault();
     setBusy(true);
     setError('');
     try {
-      await register(form);
-      navigate('/app');
+      await register({ ...form, integrationMode: mode });
+      navigate(mode === 'FBR' ? '/fbr/app' : '/app');
     } catch (err: any) {
       setError(err.message || 'Registration failed');
     } finally {
@@ -271,10 +314,19 @@ export function RegisterPage() {
   return (
     <AuthShell
       title="Create your organization"
-      hint="Spin up a tenant workspace with default PRA field mappings."
+      hint={
+        mode === 'FBR'
+          ? 'Spin up an FBR tenant workspace for DI validate/post.'
+          : 'Spin up a PRA tenant workspace with default field mappings.'
+      }
       visualTitle="Onboard in minutes"
-      visualBody="Your company gets branches, mapping presets, and connection slots for QuickBooks and PRA — ready for go-live."
+      visualBody={
+        mode === 'FBR'
+          ? 'Your company gets FBR seller profile slots and QBO connection — ready for DI sandbox testing.'
+          : 'Your company gets branches, mapping presets, and connection slots for QuickBooks and PRA — ready for go-live.'
+      }
     >
+      <IntegrationModeLoginTabs mode={mode} onChange={setMode} />
       <form onSubmit={onSubmit}>
         {error && <div className="error-box">{error}</div>}
         {(

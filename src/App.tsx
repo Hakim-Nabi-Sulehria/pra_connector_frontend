@@ -1,6 +1,6 @@
 import { Navigate, Outlet, Route, Routes } from 'react-router-dom';
 import { AuthProvider, useAuth } from './auth';
-import { AdminLayout, CustomerLayout } from './layouts/Shell';
+import { AdminLayout, CustomerLayout, FbrCustomerLayout } from './layouts/Shell';
 import {
   AdminLoginPage,
   CustomerLoginPage,
@@ -25,15 +25,34 @@ import {
   AdminCompanyDetailPage,
 } from './pages/AdminCompanies';
 import { AdminQboConfigPage } from './pages/AdminQboConfig';
+import {
+  AdminFbrCompaniesListPage,
+  AdminFbrCompanyCreatePage,
+  AdminFbrCompanyDetailPage,
+} from './pages/AdminFbrCompanies';
+import {
+  FbrAdminOverviewPage,
+  FbrCustomerConnectionsPage,
+  FbrCustomerDashboardPage,
+  FbrCustomerInvoicesPage,
+} from './pages/FbrPortals';
 import { FiscalInvoiceReportPage } from './pages/FiscalInvoiceReport';
 import { InvoiceDetailPage } from './pages/InvoiceDetail';
 import { PrivacyPage, TermsPage } from './pages/LegalPages';
+import type { IntegrationMode } from './lib/api';
 
-function Guard({ portal }: { portal: 'admin' | 'customer' }) {
-  const { user, loading, portal: active } = useAuth();
+function Guard({
+  portal,
+  mode,
+}: {
+  portal: 'admin' | 'customer';
+  mode: IntegrationMode;
+}) {
+  const { user, loading, portal: active, integrationMode } = useAuth();
   if (loading) return <p style={{ padding: 40 }}>Loading session…</p>;
-  if (!user || active !== portal) {
-    return <Navigate to={portal === 'admin' ? '/admin/login' : '/login'} replace />;
+  if (!user || active !== portal || integrationMode !== mode) {
+    if (portal === 'admin') return <Navigate to="/admin/login" replace />;
+    return <Navigate to="/login" replace />;
   }
   if (portal === 'admin' && user.role !== 'SUPER_ADMIN') {
     return <Navigate to="/login" replace />;
@@ -58,8 +77,8 @@ export default function App() {
         <Route path="/terms" element={<TermsPage />} />
         <Route path="/privacy" element={<PrivacyPage />} />
 
-        <Route element={<Guard portal="admin" />}>
-          <Route path="/admin" element={<AdminLayout />}>
+        <Route element={<Guard portal="admin" mode="PRA" />}>
+          <Route path="/admin" element={<AdminLayout mode="PRA" />}>
             <Route index element={<AdminOverviewPage />} />
             <Route path="companies" element={<AdminCompaniesListPage />} />
             <Route path="companies/new" element={<AdminCompanyCreatePage />} />
@@ -69,8 +88,17 @@ export default function App() {
           </Route>
         </Route>
 
-        <Route element={<Guard portal="customer" />}>
-          <Route path="/app" element={<CustomerLayout />}>
+        <Route element={<Guard portal="admin" mode="FBR" />}>
+          <Route path="/admin/fbr" element={<AdminLayout mode="FBR" />}>
+            <Route index element={<FbrAdminOverviewPage />} />
+            <Route path="companies" element={<AdminFbrCompaniesListPage />} />
+            <Route path="companies/new" element={<AdminFbrCompanyCreatePage />} />
+            <Route path="companies/:id" element={<AdminFbrCompanyDetailPage />} />
+          </Route>
+        </Route>
+
+        <Route element={<Guard portal="customer" mode="PRA" />}>
+          <Route path="/app" element={<CustomerLayout mode="PRA" />}>
             <Route index element={<CustomerDashboardPage />} />
             <Route path="connections" element={<CustomerConnectionsPage />} />
             <Route path="mappings" element={<CustomerMappingsPage />} />
@@ -79,6 +107,14 @@ export default function App() {
             <Route path="invoices/:id" element={<InvoiceDetailPage />} />
             <Route path="invoices/:id/print" element={<FiscalInvoiceReportPage />} />
             <Route path="logs" element={<CustomerLogsPage />} />
+          </Route>
+        </Route>
+
+        <Route element={<Guard portal="customer" mode="FBR" />}>
+          <Route path="/fbr/app" element={<FbrCustomerLayout />}>
+            <Route index element={<FbrCustomerDashboardPage />} />
+            <Route path="connections" element={<FbrCustomerConnectionsPage />} />
+            <Route path="invoices" element={<FbrCustomerInvoicesPage />} />
           </Route>
         </Route>
 

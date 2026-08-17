@@ -1,7 +1,9 @@
 const TOKEN_KEY = 'pra_connector_token';
 const PORTAL_KEY = 'pra_connector_portal';
+const MODE_KEY = 'pra_connector_mode';
 
 export type Portal = 'admin' | 'customer';
+export type IntegrationMode = 'PRA' | 'FBR';
 
 export class ApiError extends Error {
   status?: number;
@@ -26,18 +28,28 @@ export function getToken() {
   return localStorage.getItem(TOKEN_KEY);
 }
 
-export function setSession(token: string, portal: Portal) {
+export function setSession(token: string, portal: Portal, mode: IntegrationMode = 'PRA') {
   localStorage.setItem(TOKEN_KEY, token);
   localStorage.setItem(PORTAL_KEY, portal);
+  localStorage.setItem(MODE_KEY, mode);
 }
 
 export function clearSession() {
   localStorage.removeItem(TOKEN_KEY);
   localStorage.removeItem(PORTAL_KEY);
+  localStorage.removeItem(MODE_KEY);
 }
 
 export function getPortal(): Portal | null {
   return (localStorage.getItem(PORTAL_KEY) as Portal) || null;
+}
+
+export function getIntegrationMode(): IntegrationMode {
+  return (localStorage.getItem(MODE_KEY) as IntegrationMode) || 'PRA';
+}
+
+export function setIntegrationMode(mode: IntegrationMode) {
+  localStorage.setItem(MODE_KEY, mode);
 }
 
 async function fetchWithRetry(url: string, options: RequestInit, retries = 2) {
