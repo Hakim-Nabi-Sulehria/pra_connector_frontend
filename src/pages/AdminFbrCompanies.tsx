@@ -172,7 +172,7 @@ function FbrCompanyFormFields({
             disabled={disabled}
           />
           {isEdit && hasExistingToken && !form.fbrToken && (
-            <p className="field-hint">A token is already configured for this company.</p>
+            <p className="field-hint">Token already saved.</p>
           )}
         </div>
       </div>
@@ -230,7 +230,6 @@ export function AdminFbrCompaniesListPage() {
         <div>
           <div className="crumb">FBR · Tenants</div>
           <h1>Companies</h1>
-          <p>Manage FBR workspaces, seller identity, and DI API credentials.</p>
         </div>
         <Link className="btn btn-primary" to="/admin/fbr/companies/new">
           + New
@@ -331,7 +330,6 @@ export function AdminFbrCompanyCreatePage() {
             <span>New</span>
           </div>
           <h1>New FBR company</h1>
-          <p>Create a tenant with seller profile and Sandbox/Production FBR credentials.</p>
         </div>
         <Link className="btn btn-ghost" to="/admin/fbr/companies">
           Back to list
@@ -428,7 +426,6 @@ export function AdminFbrCompanyDetailPage() {
             <span>{company.name}</span>
           </div>
           <h1>{company.name}</h1>
-          <p>Company profile, seller identity, and FBR DI integration settings.</p>
         </div>
         <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}>
           {!editing ? (

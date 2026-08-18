@@ -22,11 +22,10 @@ export function LandingPage() {
       </nav>
       <section className="landing-hero">
         <h1>
-          Fiscal sync that <em>runs itself</em>
+          QuickBooks Online Connector
         </h1>
           <p>
-          Connect QuickBooks Online once. Run <strong>PRA</strong> fiscal posting and
-          <strong> FBR</strong> digital invoicing in one platform — two isolated workspaces, never mixed.
+          Connect QuickBooks Online to PRA and FBR invoicing.
         </p>
         <div className="landing-actions">
           <Link className="btn btn-primary" to="/register">
@@ -36,11 +35,6 @@ export function LandingPage() {
             Open workspace
           </Link>
         </div>
-        <p className="map-hint" style={{ marginTop: 12 }}>
-          On login, choose the <strong>PRA</strong> or <strong>FBR</strong> tab. Test users are
-          isolated: <code>pratestuser@qboconnector.com</code> (PRA) and{' '}
-          <code>fbrtestuser@qboconnector.com</code> (FBR).
-        </p>
         <p className="legal-links">
           <Link to="/terms">Terms</Link> · <Link to="/privacy">Privacy</Link>
         </p>
@@ -115,9 +109,9 @@ export function AdminLoginPage() {
   return (
     <AuthShell
       title="Super Admin access"
-      hint="One login for the platform. Switch PRA and FBR inside the control plane."
-      visualTitle="Operate the network"
-      visualBody="Monitor every tenant connection, fiscal post success rate, and integration health from one command surface."
+      hint="Sign in to the admin portal."
+      visualTitle="Admin portal"
+      visualBody="Manage companies, connections, and invoice posting."
     >
       <form onSubmit={onSubmit}>
         {error && <div className="error-box">{error}</div>}
@@ -188,16 +182,12 @@ export function CustomerLoginPage() {
     <AuthShell
       variant={mode === 'FBR' ? 'fbr' : 'pra'}
       title="Customer workspace"
-      hint={
-        mode === 'FBR'
-          ? 'Connect QuickBooks, configure FBR DI, validate and post invoices.'
-          : 'Connect QuickBooks, configure PRA, and watch invoices fiscalize.'
-      }
-      visualTitle="Set it once"
+      hint="Sign in to your workspace."
+      visualTitle="Customer workspace"
       visualBody={
         mode === 'FBR'
-          ? 'Onboard your company, wire QBO + FBR DI API, validate then post for FBR invoice numbers.'
-          : 'Onboard your company, wire QBO + PRA, then let the integration service own retries, logs, and compliance traffic.'
+          ? 'Connect QuickBooks and post invoices to FBR.'
+          : 'Connect QuickBooks and post invoices to PRA.'
       }
     >
       <IntegrationModeLoginTabs
@@ -339,16 +329,12 @@ export function RegisterPage() {
     <AuthShell
       variant={mode === 'FBR' ? 'fbr' : 'pra'}
       title="Create your organization"
-      hint={
-        mode === 'FBR'
-          ? 'Spin up an FBR tenant workspace for DI validate/post.'
-          : 'Spin up a PRA tenant workspace with default field mappings.'
-      }
-      visualTitle="Onboard in minutes"
+      hint="Create a company workspace."
+      visualTitle="Create workspace"
       visualBody={
         mode === 'FBR'
-          ? 'Your company gets FBR seller profile slots and QBO connection — ready for DI sandbox testing.'
-          : 'Your company gets branches, mapping presets, and connection slots for QuickBooks and PRA — ready for go-live.'
+          ? 'Register your company for FBR invoicing.'
+          : 'Register your company for PRA invoicing.'
       }
     >
       <IntegrationModeLoginTabs mode={mode} onChange={setMode} />
@@ -429,9 +415,9 @@ export function ResetPasswordRequestPage() {
   return (
     <AuthShell
       title="Reset password"
-      hint="Enter your email and we will generate an OTP."
-      visualTitle="Secure reset"
-      visualBody="OTP verification protects your account from unauthorized password changes."
+      hint="Enter your email to receive an OTP."
+      visualTitle="Reset password"
+      visualBody="We will send an OTP to verify your account."
     >
       <form onSubmit={sendOtp}>
         {error && <div className="error-box">{error}</div>}
@@ -512,9 +498,9 @@ export function ResetPasswordOtpPage() {
   return (
     <AuthShell
       title="Enter OTP"
-      hint="We generated an OTP for password reset."
-      visualTitle="OTP check"
-      visualBody="Confirm your OTP to unlock the password update form."
+      hint="Enter the OTP sent to your email."
+      visualTitle="Verify OTP"
+      visualBody="Confirm the OTP to continue."
     >
       <form onSubmit={verify}>
         {error && <div className="error-box">{error}</div>}
@@ -530,9 +516,6 @@ export function ResetPasswordOtpPage() {
             placeholder="Enter OTP"
             required
           />
-          {debugOtp ? (
-            <p className="field-hint">Debug OTP (test): {debugOtp}</p>
-          ) : null}
         </div>
         <button className="btn btn-primary" style={{ width: '100%' }} disabled={busy}>
           {busy ? 'Verifying…' : 'Verify OTP'}

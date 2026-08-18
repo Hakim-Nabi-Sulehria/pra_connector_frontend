@@ -48,7 +48,7 @@ export function AdminLayout({ mode = 'PRA' }: { mode?: IntegrationMode }) {
       <aside className="sidebar">
         <div className="brand">
           <BrandMark />
-          <div className="brand-sub">{mode === 'FBR' ? 'FBR control plane' : 'Super Admin — PRA'}</div>
+          <div className="brand-sub">{mode === 'FBR' ? 'FBR Admin' : 'PRA Admin'}</div>
         </div>
         <IntegrationModeTabs mode={mode} admin />
         <nav className="nav-group">

@@ -82,7 +82,6 @@ export function AdminQboConfigPage() {
       <div className="topbar">
         <div>
           <h1>QuickBooks Online Configuration</h1>
-          <p>Manage Intuit OAuth credentials for sandbox and production.</p>
         </div>
         <Link className="btn btn-ghost" to="/admin/companies">
           Back
@@ -120,7 +119,7 @@ export function AdminQboConfigPage() {
             value={clientId}
             onChange={(e) => setClientId(e.target.value)}
             disabled={!editing || busy}
-            placeholder="Intuit Developer app Client ID"
+            placeholder="Client ID"
           />
         </div>
 
@@ -142,7 +141,7 @@ export function AdminQboConfigPage() {
             }
           />
           {!editing && creds.hasClientSecret && (
-            <p className="field-hint">Secret is already configured. Click Edit to change it.</p>
+            <p className="field-hint">Secret already saved.</p>
           )}
         </div>
 

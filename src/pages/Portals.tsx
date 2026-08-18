@@ -32,7 +32,6 @@ export function AdminOverviewPage() {
       <div className="topbar">
         <div>
           <h1>Dashboard</h1>
-          <p>Platform overview — companies, connections, and invoice traffic.</p>
         </div>
         <Link className="btn btn-primary" to="/admin/companies">
           Manage companies
@@ -129,7 +128,6 @@ export function AdminOrganizationsPage() {
       <div className="topbar">
         <div>
           <h1>Organizations</h1>
-          <p>Configure each company’s PRA POS ID, API URL, and token.</p>
         </div>
         <div style={{ display: 'flex', gap: 8 }}>
           <input
@@ -317,7 +315,6 @@ export function AdminUsersPage() {
       <div className="topbar">
         <div>
           <h1>Users</h1>
-          <p>Customer admins and workspace members.</p>
         </div>
       </div>
       <div className="card">
@@ -358,7 +355,6 @@ export function AdminInvoicesPage() {
       <div className="topbar">
         <div>
           <h1>Invoice Traffic</h1>
-          <p>Cross-tenant fiscalization pipeline.</p>
         </div>
       </div>
       <div className="card">
@@ -409,8 +405,7 @@ export function AdminLogsPage() {
     <>
       <div className="topbar">
         <div>
-          <h1>Audit Stream</h1>
-          <p>Immutable trail of platform actions.</p>
+          <h1>Activity</h1>
         </div>
       </div>
       <div className="card">
@@ -454,7 +449,6 @@ export function CustomerDashboardPage() {
         <div className="topbar">
           <div>
             <h1>{data.org?.name || 'Workspace'}</h1>
-            <p>Connect QuickBooks Online to fetch invoices and post to PRA.</p>
           </div>
         </div>
         <QboConnectPrompt
@@ -471,7 +465,6 @@ export function CustomerDashboardPage() {
       <div className="topbar">
         <div>
           <h1>{data.org?.name}</h1>
-          <p>Set it up once — then the connector keeps fiscal posts flowing.</p>
         </div>
         <Link className="btn btn-primary" to="/app/connections">
           {qboConnected ? 'Manage connections' : 'Connect to QuickBooks online'}
@@ -660,7 +653,7 @@ export function CustomerConnectionsPage() {
     const qbo = params.get('qbo') || flash?.qbo || '';
     const message = params.get('message') || flash?.message || '';
     if (qbo === 'connected') {
-      setMsg('QuickBooks connected successfully.');
+      setMsg('QuickBooks connected.');
       window.history.replaceState({}, '', '/app/connections');
     }
     if (qbo === 'error') {
@@ -677,7 +670,6 @@ export function CustomerConnectionsPage() {
       <div className="topbar">
         <div>
           <h1>Connections</h1>
-          <p>Connect QuickBooks. PRA credentials are managed by Super Admin for your company.</p>
         </div>
       </div>
       {msg && (
@@ -719,7 +711,7 @@ export function CustomerConnectionsPage() {
             >
               {data.qbo?.status === 'CONNECTED'
                 ? 'Reconnect QuickBooks'
-                : 'Connect QuickBooks (Live)'}
+                : 'Connect QuickBooks'}
             </button>
             {data.qbo?.status === 'CONNECTED' && (
               <button
@@ -728,7 +720,7 @@ export function CustomerConnectionsPage() {
                   setErr('');
                   try {
                     await load();
-                    setMsg('Synced latest company + invoices from QBO');
+                    setMsg('Data refreshed.');
                   } catch (e: any) {
                     setErr(e.message);
                   }
@@ -738,15 +730,6 @@ export function CustomerConnectionsPage() {
               </button>
             )}
           </div>
-          <p className="map-hint" style={{ marginTop: 12 }}>
-            Intuit Developer app → Keys → Redirect URIs must include exactly:{' '}
-            <code>
-              {data.qboRedirectUri ||
-                'https://pra-connector-backend.onrender.com/api/qbo/callback'}
-            </code>
-            . Development keys require <code>QBO_ENVIRONMENT=sandbox</code>;
-            Production keys require <code>QBO_ENVIRONMENT=production</code>.
-          </p>
         </div>
         <div className="card">
           <h3>PRA e-IMS</h3>
@@ -777,10 +760,6 @@ export function CustomerConnectionsPage() {
               </strong>
             </div>
           </div>
-          <p className="map-hint" style={{ marginTop: 12 }}>
-            Super Admin sets POS ID, PRA API URL, and token for your company. Those values are used
-            automatically when posting invoices.
-          </p>
         </div>
       </div>
 
@@ -788,7 +767,7 @@ export function CustomerConnectionsPage() {
 
       {data.qbo?.status === 'CONNECTED' && (
         <div className="card" style={{ marginTop: 16 }}>
-          <h3>Live QuickBooks invoices (read-only)</h3>
+          <h3>QuickBooks invoices</h3>
           <table className="table">
             <thead>
               <tr>
@@ -855,10 +834,7 @@ function CompanyInfoPanel({ company }: { company: any }) {
 
   return (
     <div className="card" style={{ marginTop: 16 }}>
-      <h3>Live company profile (read-only)</h3>
-      <p className="map-hint" style={{ marginTop: 0 }}>
-        Fetched from QuickBooks Online — no changes are made in your QBO company.
-      </p>
+      <h3>Company profile</h3>
       <div className="step-list">
         {rows.map(([label, value]) => (
           <div className="step-item" key={label}>
@@ -899,14 +875,14 @@ function MappingSectionTable({
     <div className="card map-section">
       <div className="map-section-title">
         <h3>{title}</h3>
-        <span className="map-hint">{hint}</span>
+        {hint ? <span className="map-hint">{hint}</span> : null}
       </div>
       <table className="table map-table">
         <thead>
           <tr>
             <th style={{ width: 56 }}>#</th>
             <th>{targetColumnLabel}</th>
-            <th>QBO key (drag to swap)</th>
+            <th>QBO key</th>
             <th>Sample value</th>
             <th>Required</th>
             <th></th>
@@ -1214,7 +1190,7 @@ export function CustomerMappingsPage() {
         body: JSON.stringify({ items, invoiceId: invoiceId || undefined }),
       });
       hydrate(next);
-      setMsg('Mappings saved successfully.');
+      setMsg('Mappings saved.');
     } catch (e: any) {
       setError(e.message);
     } finally {
@@ -1229,10 +1205,6 @@ export function CustomerMappingsPage() {
       <div className="topbar">
         <div>
           <h1>Keys configuration</h1>
-          <p>
-            Adjust QBO keys against {isFbr ? 'FBR DI' : 'PRA'} header/line fields, then click Save
-            to persist.
-          </p>
         </div>
         <div style={{ display: 'flex', gap: 8, alignItems: 'center' }}>
           {dirty && <span className="badge warn">Unsaved changes</span>}
@@ -1257,18 +1229,10 @@ export function CustomerMappingsPage() {
         <div className="card" style={{ marginBottom: 16 }}>
           <div className="step-list">
             <div className="step-item">
-              <span>Admin-managed PRA POS ID</span>
+              <span>POS ID</span>
               <strong>{workspace?.header?.find((row: any) => row.praKey === 'POSID')?.value || 'Not configured'}</strong>
             </div>
-            <div className="step-item">
-              <span>Source in mappings</span>
-              <strong className="mono">pra.posId</strong>
-            </div>
           </div>
-          <p className="map-hint" style={{ marginTop: 12, marginBottom: 0 }}>
-            This POS ID is set only in the Super Admin PRA company profile. Customer workspace can view
-            it here but cannot edit it.
-          </p>
         </div>
       )}
 
@@ -1276,7 +1240,7 @@ export function CustomerMappingsPage() {
         <div className="toolbar">
           <StatusBadge status={workspace?.connected ? 'CONNECTED' : 'DISCONNECTED'} />
           <span style={{ color: 'var(--muted)' }}>
-            {workspace?.companyName || 'Connect QuickBooks to load live sample values'}
+            {workspace?.companyName || 'Connect QuickBooks'}
           </span>
           {workspace?.invoices?.length > 0 && (
             <select
@@ -1323,7 +1287,7 @@ export function CustomerMappingsPage() {
         <>
           <MappingSectionTable
             title="Header fields"
-            hint={isFbr ? 'Invoice-level FBR DI payload' : 'Invoice-level PRA payload'}
+            hint=""
             section="HEADER"
             rows={header}
             availableKeys={workspace.availableQboKeys || []}
@@ -1335,11 +1299,7 @@ export function CustomerMappingsPage() {
 
           <MappingSectionTable
             title="Line item fields"
-            hint={
-              isFbr
-                ? 'Repeating items[] FBR payload (sample from first sales line)'
-                : 'Repeating Items[] PRA payload (values from first sales line)'
-            }
+            hint=""
             section="LINE"
             rows={lines}
             availableKeys={workspace.availableQboKeys || []}
@@ -1371,7 +1331,6 @@ export function CustomerBranchesPage() {
       <div className="topbar">
         <div>
           <h1>Branches</h1>
-          <p>Map outlets to PRA POS identifiers.</p>
         </div>
       </div>
       <div className="card" style={{ marginBottom: 16 }}>
@@ -1554,7 +1513,6 @@ export function CustomerInvoicesPage() {
       <div className="topbar">
         <div>
           <h1>Invoices</h1>
-          <p>Select invoices to post to PRA, or open any row for print preview.</p>
         </div>
         <div className="invoice-toolbar-actions">
           <button className="btn btn-ghost" disabled={busy || posting} onClick={load}>
@@ -1718,7 +1676,6 @@ export function CustomerLogsPage() {
       <div className="topbar">
         <div>
           <h1>Activity</h1>
-          <p>Workspace audit trail for connections and posts.</p>
         </div>
       </div>
       <div className="card">

@@ -81,7 +81,6 @@ export function AdminCompaniesListPage() {
       <div className="topbar">
         <div>
           <h1>Companies</h1>
-          <p>Manage tenant companies, login credentials, and PRA integration.</p>
         </div>
         <Link className="btn btn-primary" to="/admin/companies/new">
           + New
@@ -341,12 +340,9 @@ function CompanyFormFields({
           <input
             value={form.posId}
             onChange={(e) => setForm({ ...form, posId: e.target.value })}
-            placeholder="Admin-managed POS ID for PRA production"
+            placeholder="POS ID"
             disabled={disabled}
           />
-          <p className="field-hint">
-            This value is managed by Super Admin and appears in PRA keys configuration as `pra.posId`.
-          </p>
         </div>
       )}
       <div className="field">
@@ -372,7 +368,7 @@ function CompanyFormFields({
           disabled={disabled}
         />
         {isEdit && hasExistingToken && !form.praToken && (
-          <p className="field-hint">A token is already configured for this company.</p>
+          <p className="field-hint">Token already saved.</p>
         )}
       </div>
     </>
@@ -415,7 +411,6 @@ export function AdminCompanyCreatePage() {
       <div className="topbar">
         <div>
           <h1>New company</h1>
-          <p>Create a tenant workspace with login and PRA credentials.</p>
         </div>
         <Link className="btn btn-ghost" to="/admin/companies">
           Back to list
@@ -525,7 +520,6 @@ export function AdminCompanyDetailPage() {
       <div className="topbar">
         <div>
           <h1>{company.name}</h1>
-          <p>Company profile, login, and PRA integration settings.</p>
         </div>
         <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}>
           {!editing ? (

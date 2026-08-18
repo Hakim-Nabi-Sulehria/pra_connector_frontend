@@ -63,9 +63,7 @@ export function FbrAdminOverviewPage() {
     <>
       <div className="topbar">
         <div>
-          <div className="crumb">FBR control plane</div>
           <h1>Dashboard</h1>
-          <p>Federal Board of Revenue — DI validate/post overview, isolated from PRA.</p>
         </div>
         <Link className="btn btn-primary" to="/admin/fbr/companies/new">
           + New FBR company
@@ -113,9 +111,6 @@ export function FbrAdminOverviewPage() {
               </div>
             ))}
           </div>
-          <p className="map-hint" style={{ marginTop: 12 }}>
-            FBR invoice numbers only — never mixed with PRA fiscal numbers.
-          </p>
         </div>
         <div className="card">
           <div className="status-card-title">
@@ -229,7 +224,6 @@ export function FbrCustomerDashboardPage() {
           <div>
             <div className="crumb">FBR workspace</div>
             <h1>{data.org?.name || 'FBR workspace'}</h1>
-            <p>Connect QuickBooks Online to fetch invoices and post to FBR DI.</p>
           </div>
         </div>
         <QboConnectPrompt
@@ -247,7 +241,6 @@ export function FbrCustomerDashboardPage() {
         <div>
           <div className="crumb">FBR workspace</div>
           <h1>{data.org?.name}</h1>
-          <p>QuickBooks → FBR DI validate/post. FBR invoice numbers stay isolated from PRA.</p>
         </div>
         <Link className="btn btn-primary" to="/fbr/app/connections">
           Manage connections
@@ -379,7 +372,7 @@ export function FbrCustomerConnectionsPage() {
     const qbo = params.get('qbo') || flash?.qbo || '';
     const message = params.get('message') || flash?.message || '';
     if (qbo === 'connected') {
-      setMsg('QuickBooks connected successfully.');
+      setMsg('QuickBooks connected.');
       window.history.replaceState({}, '', '/fbr/app/connections');
     }
     if (qbo === 'error') {
@@ -397,7 +390,6 @@ export function FbrCustomerConnectionsPage() {
         <div>
           <div className="crumb">FBR workspace</div>
           <h1>Connections</h1>
-          <p>Connect QuickBooks. FBR seller identity and token are managed by Super Admin.</p>
         </div>
       </div>
       {msg && (
@@ -437,7 +429,7 @@ export function FbrCustomerConnectionsPage() {
                 }
               }}
             >
-              {data.qbo?.status === 'CONNECTED' ? 'Reconnect QuickBooks' : 'Connect QuickBooks (Live)'}
+              {data.qbo?.status === 'CONNECTED' ? 'Reconnect QuickBooks' : 'Connect QuickBooks'}
             </button>
             {data.qbo?.status === 'CONNECTED' && (
               <button
@@ -446,7 +438,7 @@ export function FbrCustomerConnectionsPage() {
                   setErr('');
                   try {
                     await load();
-                    setMsg('Synced latest company + invoices from QBO');
+                    setMsg('Data refreshed.');
                   } catch (e: any) {
                     setErr(e.message);
                   }
@@ -456,14 +448,6 @@ export function FbrCustomerConnectionsPage() {
               </button>
             )}
           </div>
-          <p className="map-hint" style={{ marginTop: 12 }}>
-            Redirect URI must match Intuit Keys for the same tab as Render Client ID:{' '}
-            <code>
-              {data.qboRedirectUri ||
-                'https://pra-connector-backend.onrender.com/api/qbo/callback'}
-            </code>
-            . Development keys = sandbox. Production keys = production. Do not add the Vercel frontend URL.
-          </p>
         </div>
         <div className="card">
           <h3>FBR / PRAL DI</h3>
@@ -488,16 +472,12 @@ export function FbrCustomerConnectionsPage() {
               <strong>{data.fbr?.hasToken ? 'Configured by admin' : 'Not configured'}</strong>
             </div>
           </div>
-          <p className="map-hint" style={{ marginTop: 12 }}>
-            Super Admin sets Sandbox/Production, API URL, seller NTN, and bearer token. Validate
-            then post returns an FBR invoice number — never a PRA fiscal number.
-          </p>
         </div>
       </div>
 
       {data.qbo?.status === 'CONNECTED' && company?.company && (
         <div className="card" style={{ marginTop: 16 }}>
-          <h3>Live company profile (read-only)</h3>
+          <h3>Company profile</h3>
           <div className="step-list">
             <div className="step-item">
               <span>Company name</span>
@@ -513,7 +493,7 @@ export function FbrCustomerConnectionsPage() {
 
       {data.qbo?.status === 'CONNECTED' && (
         <div className="card" style={{ marginTop: 16 }}>
-          <h3>Live QuickBooks invoices (read-only)</h3>
+          <h3>QuickBooks invoices</h3>
           <table className="table">
             <thead>
               <tr>
@@ -636,7 +616,6 @@ export function FbrCustomerInvoicesPage() {
         <div>
           <div className="crumb">FBR workspace</div>
           <h1>Invoices</h1>
-          <p>Validate then post to FBR DI — stores FBR invoice number, not PRA fiscal number.</p>
         </div>
         <select
           value={scenario}

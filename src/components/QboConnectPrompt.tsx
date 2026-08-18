@@ -20,10 +20,9 @@ export function QboConnectPrompt({
         <Plug size={14} style={{ marginRight: 6, verticalAlign: -2 }} />
         QuickBooks Online
       </div>
-      <h2 style={{ marginTop: 4 }}>Connect your QuickBooks company</h2>
+      <h2 style={{ marginTop: 4 }}>Connect QuickBooks</h2>
       <p>
-        {companyName ? <strong>{companyName}</strong> : 'This workspace'} needs a QuickBooks Online
-        connection before invoices can be fetched, mapped, or posted.
+        {companyName ? <strong>{companyName}</strong> : 'This workspace'} is not connected to QuickBooks.
       </p>
       {err && <div className="error-box">{err}</div>}
       <button
@@ -40,11 +39,8 @@ export function QboConnectPrompt({
           }
         }}
       >
-        {busy ? 'Opening QuickBooks…' : 'Connect QuickBooks Online'}
+        {busy ? 'Opening QuickBooks…' : 'Connect QuickBooks'}
       </button>
-      <p className="map-hint" style={{ marginTop: 12, marginBottom: 0 }}>
-        After you approve on Intuit, you will return to this workspace still signed in.
-      </p>
     </div>
   );
 }
