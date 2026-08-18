@@ -171,6 +171,56 @@ textarea {
   grid-template-columns: 1.4fr 1fr;
 }
 
+.grid.two-eq {
+  grid-template-columns: 1fr 1fr;
+}
+
+.grid.three {
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+}
+
+.crumb {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 12.5px;
+  color: var(--muted);
+  margin-bottom: 6px;
+}
+
+.crumb a {
+  color: var(--teal);
+}
+
+.form-section-title {
+  margin: 18px 0 4px;
+  font-size: 0.72rem;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  font-weight: 700;
+  color: var(--muted);
+}
+
+.form-section-title:first-child {
+  margin-top: 0;
+}
+
+.form-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 4px 16px;
+}
+
+.form-grid .span-2 {
+  grid-column: 1 / -1;
+}
+
+.flash-ok {
+  margin-bottom: 16px;
+  color: var(--ok);
+  border-color: rgba(15, 118, 110, 0.25);
+}
+
 .card {
   background: var(--panel);
   backdrop-filter: blur(14px);
@@ -991,6 +1041,109 @@ textarea {
   max-width: 720px;
 }
 
+.form-card.wide {
+  max-width: 980px;
+}
+
+.identity-card {
+  display: grid;
+  grid-template-columns: 1fr auto;
+  gap: 16px;
+  align-items: start;
+  margin-bottom: 16px;
+}
+
+.identity-kicker,
+.identity-card .identity-kicker {
+  font-size: 12px;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--muted);
+  font-weight: 700;
+  margin-bottom: 6px;
+}
+
+.identity-card h2 {
+  margin: 0 0 6px;
+  font-family: var(--font-display);
+  font-size: 1.35rem;
+  letter-spacing: -0.03em;
+}
+
+.identity-meta {
+  color: var(--muted);
+  font-size: 13px;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px 14px;
+}
+
+.chip-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  justify-content: flex-end;
+}
+
+.traffic-chart {
+  display: flex;
+  gap: 12px;
+  align-items: flex-end;
+}
+
+.traffic-col {
+  flex: 1;
+  min-width: 90px;
+}
+
+.traffic-track {
+  height: 120px;
+  border-radius: 14px;
+  border: 1px solid var(--line);
+  display: flex;
+  align-items: flex-end;
+  padding: 10px;
+  background: rgba(255, 255, 255, 0.65);
+}
+
+.traffic-fill {
+  width: 100%;
+  border-radius: 10px;
+  min-height: 6px;
+  transition: height 0.2s ease;
+}
+
+.kpi-card .kpi-icon {
+  width: 28px;
+  height: 28px;
+  border-radius: 8px;
+  display: grid;
+  place-items: center;
+  background: rgba(15, 118, 110, 0.1);
+  color: var(--teal);
+  margin-bottom: 10px;
+}
+
+.kpi-card.warn-kpi .kpi-icon {
+  background: rgba(217, 119, 6, 0.12);
+  color: var(--warn);
+}
+
+.kpi-card.danger-kpi .kpi-icon {
+  background: rgba(225, 29, 72, 0.1);
+  color: var(--danger);
+}
+
+.qbo-connect-card {
+  max-width: 640px;
+  padding: 28px;
+}
+
+.qbo-connect-card h2 {
+  font-family: var(--font-display);
+  letter-spacing: -0.03em;
+}
+
 .form-actions {
   display: flex;
   gap: 8px;
@@ -1062,7 +1215,9 @@ textarea {
 }
 
 .dense-portal .brand-mark {
-  font-size: 1.05rem;
+  font-size: 0.92rem;
+  line-height: 1.25;
+  max-width: 180px;
 }
 
 .dense-portal .brand-sub {
@@ -1887,8 +2042,15 @@ textarea {
   }
   .grid.kpi,
   .grid.two,
+  .grid.two-eq,
+  .grid.three,
+  .form-grid,
+  .identity-card,
   .auth-page {
     grid-template-columns: 1fr;
+  }
+  .chip-row {
+    justify-content: flex-start;
   }
   .auth-visual {
     min-height: 280px;

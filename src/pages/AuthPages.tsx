@@ -9,7 +9,7 @@ export function LandingPage() {
     <div className="landing">
       <nav className="landing-nav">
         <div className="brand-mark" style={{ fontFamily: 'var(--font-display)', fontWeight: 700 }}>
-          PRA <span style={{ color: 'var(--teal)' }}>Connector</span>
+          QuickBooks Online <span style={{ color: 'var(--teal)' }}>Connector</span>
         </div>
         <div className="landing-actions">
           <Link className="btn btn-ghost" to="/login">
@@ -25,23 +25,21 @@ export function LandingPage() {
           Fiscal sync that <em>runs itself</em>
         </h1>
           <p>
-          Connect QuickBooks Online once, map PRA fields or post FBR DI invoices — two fully
-          isolated integration modes.
+          Connect QuickBooks Online once. Run <strong>PRA</strong> fiscal posting and
+          <strong> FBR</strong> digital invoicing in one platform — two isolated workspaces, never mixed.
         </p>
         <div className="landing-actions">
           <Link className="btn btn-primary" to="/register">
             Start onboarding
           </Link>
           <Link className="btn btn-ghost" to="/login">
-            PRA workspace
-          </Link>
-          <Link className="btn btn-ghost" to="/login">
-            FBR workspace
+            Open workspace
           </Link>
         </div>
         <p className="map-hint" style={{ marginTop: 12 }}>
-          On login, choose the <strong>PRA</strong> or <strong>FBR</strong> tab — records never
-          mix between modes.
+          On login, choose the <strong>PRA</strong> or <strong>FBR</strong> tab. Test users are
+          isolated: <code>pratestuser@qboconnector.com</code> (PRA) and{' '}
+          <code>fbrtestuser@qboconnector.com</code> (FBR).
         </p>
         <p className="legal-links">
           <Link to="/terms">Terms</Link> · <Link to="/privacy">Privacy</Link>
@@ -68,7 +66,9 @@ function AuthShell({
     <div className="auth-page">
       <div className="auth-visual">
         <div>
-          <div style={{ opacity: 0.7, marginBottom: 18, fontWeight: 700 }}>PRA Connector</div>
+          <div style={{ opacity: 0.7, marginBottom: 18, fontWeight: 700 }}>
+            QuickBooks Online Connector
+          </div>
           <h1>{visualTitle}</h1>
           <p>{visualBody}</p>
         </div>
@@ -85,16 +85,15 @@ function AuthShell({
 }
 
 export function AdminLoginPage() {
-  const { login, user, portal, integrationMode, loading } = useAuth();
+  const { login, user, portal, loading } = useAuth();
   const navigate = useNavigate();
-  const [mode, setMode] = useState<IntegrationMode>('PRA');
   const [email, setEmail] = useState('admin@praconnector.com');
   const [password, setPassword] = useState('Admin@12345');
   const [error, setError] = useState('');
   const [busy, setBusy] = useState(false);
 
-  if (!loading && user && portal === 'admin' && integrationMode === mode) {
-    return <Navigate to={mode === 'FBR' ? '/admin/fbr' : '/admin'} replace />;
+  if (!loading && user && portal === 'admin') {
+    return <Navigate to="/admin" replace />;
   }
 
   async function onSubmit(e: FormEvent) {
@@ -102,8 +101,8 @@ export function AdminLoginPage() {
     setBusy(true);
     setError('');
     try {
-      await login('admin', email, password, mode);
-      navigate(mode === 'FBR' ? '/admin/fbr' : '/admin');
+      await login('admin', email, password, 'PRA');
+      navigate('/admin');
     } catch (err: any) {
       setError(err.message || 'Login failed');
     } finally {
@@ -114,11 +113,10 @@ export function AdminLoginPage() {
   return (
     <AuthShell
       title="Super Admin access"
-      hint={`Platform control plane — ${mode} organizations, traffic, and audit.`}
+      hint="One login for the platform. Switch PRA and FBR inside the control plane."
       visualTitle="Operate the network"
       visualBody="Monitor every tenant connection, fiscal post success rate, and integration health from one command surface."
     >
-      <IntegrationModeLoginTabs mode={mode} onChange={setMode} />
       <form onSubmit={onSubmit}>
         {error && <div className="error-box">{error}</div>}
         <div className="field">
@@ -149,8 +147,8 @@ export function CustomerLoginPage() {
   const { login, user, portal, integrationMode, loading } = useAuth();
   const navigate = useNavigate();
   const [mode, setMode] = useState<IntegrationMode>('PRA');
-  const [email, setEmail] = useState('demo@fenzi.com');
-  const [password, setPassword] = useState('Demo@12345');
+  const [email, setEmail] = useState('pratestuser@qboconnector.com');
+  const [password, setPassword] = useState('Pratest@12345');
   const [error, setError] = useState('');
   const [busy, setBusy] = useState(false);
   const [captcha, setCaptcha] = useState(() => {
@@ -198,7 +196,19 @@ export function CustomerLoginPage() {
           : 'Onboard your company, wire QBO + PRA, then let the integration service own retries, logs, and compliance traffic.'
       }
     >
-      <IntegrationModeLoginTabs mode={mode} onChange={setMode} />
+      <IntegrationModeLoginTabs
+        mode={mode}
+        onChange={(next) => {
+          setMode(next);
+          if (next === 'FBR') {
+            setEmail('fbrtestuser@qboconnector.com');
+            setPassword('Fbrtest@12345');
+          } else {
+            setEmail('pratestuser@qboconnector.com');
+            setPassword('Pratest@12345');
+          }
+        }}
+      />
       <form onSubmit={onSubmit}>
         {error && <div className="error-box">{error}</div>}
         <div className="field">

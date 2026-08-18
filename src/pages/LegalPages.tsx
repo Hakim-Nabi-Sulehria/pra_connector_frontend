@@ -5,7 +5,7 @@ function LegalLayout({ title, children }: { title: string; children: React.React
     <div className="legal-page">
       <header className="legal-header">
         <Link to="/" className="brand-mark legal-brand">
-          PRA <span>Connector</span>
+          QuickBooks Online <span>Connector</span>
         </Link>
         <nav className="legal-nav">
           <Link to="/terms">Terms</Link>
@@ -19,7 +19,7 @@ function LegalLayout({ title, children }: { title: string; children: React.React
         {children}
       </main>
       <footer className="legal-footer">
-        <span>© 2026 PRA Connector</span>
+        <span>© 2026 QuickBooks Online Connector</span>
         <span>
           <Link to="/terms">Terms</Link> · <Link to="/privacy">Privacy</Link>
         </span>
@@ -35,16 +35,16 @@ export function TermsPage() {
         <h2>1. Agreement</h2>
         <p>
           This End-User License Agreement (&quot;Agreement&quot;) is between you (&quot;Customer&quot;,
-          &quot;you&quot;) and the operator of PRA Connector (&quot;we&quot;, &quot;us&quot;,
-          &quot;Service&quot;). By accessing or using PRA Connector, you agree to this Agreement.
+          &quot;you&quot;) and the operator of QuickBooks Online Connector (&quot;we&quot;, &quot;us&quot;,
+          &quot;Service&quot;). By accessing or using QuickBooks Online Connector, you agree to this Agreement.
         </p>
       </section>
       <section>
         <h2>2. Service description</h2>
         <p>
-          PRA Connector is a software service that helps businesses connect QuickBooks Online with
-          the Punjab Revenue Authority (PRA) Electronic Invoice Monitoring System (e-IMS) for
-          invoice mapping, synchronization, and fiscal posting workflows.
+          QuickBooks Online Connector is a software service that helps businesses connect QuickBooks
+          Online with Punjab Revenue Authority (PRA) e-IMS and Federal Board of Revenue (FBR) Digital
+          Invoicing in one platform. PRA and FBR workspaces stay fully isolated — records never mix.
         </p>
       </section>
       <section>
@@ -119,9 +119,9 @@ export function PrivacyPage() {
       <section>
         <h2>1. Overview</h2>
         <p>
-          PRA Connector (&quot;we&quot;, &quot;us&quot;) respects your privacy. This Privacy Policy
+          QuickBooks Online Connector (&quot;we&quot;, &quot;us&quot;) respects your privacy. This Privacy Policy
           explains how we collect, use, store, and protect information when you use our integration
-          platform connecting QuickBooks Online and PRA e-IMS.
+          platform connecting QuickBooks Online with PRA e-IMS and FBR Digital Invoicing.
         </p>
       </section>
       <section>

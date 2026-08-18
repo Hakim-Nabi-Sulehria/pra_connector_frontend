@@ -85,6 +85,8 @@ export async function api<T = any>(
   };
   const token = getToken();
   if (token) headers.Authorization = `Bearer ${token}`;
+  const mode = getIntegrationMode();
+  if (mode) headers['X-Integration-Mode'] = mode;
 
   const url = `${API_BASE}/api${path}`;
   const res = await fetchWithRetry(url, { ...options, headers });

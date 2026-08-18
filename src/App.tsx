@@ -50,8 +50,11 @@ function Guard({
 }) {
   const { user, loading, portal: active, integrationMode } = useAuth();
   if (loading) return <p style={{ padding: 40 }}>Loading session…</p>;
-  if (!user || active !== portal || integrationMode !== mode) {
+  if (!user || active !== portal) {
     if (portal === 'admin') return <Navigate to="/admin/login" replace />;
+    return <Navigate to="/login" replace />;
+  }
+  if (portal === 'customer' && integrationMode !== mode) {
     return <Navigate to="/login" replace />;
   }
   if (portal === 'admin' && user.role !== 'SUPER_ADMIN') {
@@ -94,9 +97,9 @@ export default function App() {
             <Route path="companies" element={<AdminFbrCompaniesListPage />} />
             <Route path="companies/new" element={<AdminFbrCompanyCreatePage />} />
             <Route path="companies/:id" element={<AdminFbrCompanyDetailPage />} />
+            <Route path="qbo-config" element={<AdminQboConfigPage />} />
           </Route>
         </Route>
-
         <Route element={<Guard portal="customer" mode="PRA" />}>
           <Route path="/app" element={<CustomerLayout mode="PRA" />}>
             <Route index element={<CustomerDashboardPage />} />
@@ -114,7 +117,9 @@ export default function App() {
           <Route path="/fbr/app" element={<FbrCustomerLayout />}>
             <Route index element={<FbrCustomerDashboardPage />} />
             <Route path="connections" element={<FbrCustomerConnectionsPage />} />
+            <Route path="mappings" element={<CustomerMappingsPage />} />
             <Route path="invoices" element={<FbrCustomerInvoicesPage />} />
+            <Route path="logs" element={<CustomerLogsPage />} />
           </Route>
         </Route>
 

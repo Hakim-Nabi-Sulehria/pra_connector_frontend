@@ -52,6 +52,7 @@ type AuthState = {
   }) => Promise<User>;
   logout: () => void;
   refresh: () => Promise<void>;
+  switchMode: (mode: IntegrationMode) => void;
 };
 
 const AuthContext = createContext<AuthState | null>(null);
@@ -72,9 +73,14 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       const me = await api<User>('/auth/me');
       setUser(me);
       setPortal(getPortal());
-      const mode = me.integrationMode || getIntegrationMode();
-      setMode(mode);
-      setIntegrationMode(mode);
+      // Super Admin keeps the in-app PRA/FBR tab; do not reset it from JWT.
+      if (getPortal() === 'admin' && me.role === 'SUPER_ADMIN') {
+        setMode(getIntegrationMode());
+      } else {
+        const mode = me.integrationMode || getIntegrationMode();
+        setMode(mode);
+        setIntegrationMode(mode);
+      }
     } catch (err) {
       if (err instanceof ApiError && (err.status === 401 || err.status === 403)) {
         clearSession();
@@ -140,6 +146,11 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     setPortal(null);
   }, []);
 
+  const switchMode = useCallback((mode: IntegrationMode) => {
+    setIntegrationMode(mode);
+    setMode(mode);
+  }, []);
+
   const value = useMemo(
     () => ({
       user,
@@ -150,8 +161,9 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       register,
       logout,
       refresh,
+      switchMode,
     }),
-    [user, portal, integrationMode, loading, login, register, logout, refresh],
+    [user, portal, integrationMode, loading, login, register, logout, refresh, switchMode],
   );
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;

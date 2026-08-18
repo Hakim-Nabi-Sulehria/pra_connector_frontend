@@ -7,7 +7,7 @@ export function PageLoader({ label = 'Loading…' }: { label?: string }) {
         <span className="page-loader-ring page-loader-ring-c" />
         <span className="page-loader-core">
           <span className="page-loader-core-glow" />
-          <span className="page-loader-mark">PRA</span>
+          <span className="page-loader-mark">QBO</span>
         </span>
       </div>
       <div className="page-loader-copy">

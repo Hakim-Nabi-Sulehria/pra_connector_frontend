@@ -3,6 +3,7 @@ import { Link, useNavigate } from 'react-router-dom';
 import { api } from '../lib/api';
 import { useAuth } from '../auth';
 import { PageLoader } from '../components/PageLoader';
+import { QboConnectPrompt } from '../components/QboConnectPrompt';
 
 function StatusBadge({ status }: { status?: string }) {
   const s = (status || 'DISCONNECTED').toUpperCase();
@@ -446,6 +447,24 @@ export function CustomerDashboardPage() {
   const pct = Math.round((data.onboarding.completed / data.onboarding.total) * 100);
   const qboConnected = data.org?.qbo?.status === 'CONNECTED';
 
+  if (!qboConnected) {
+    return (
+      <>
+        <div className="topbar">
+          <div>
+            <h1>{data.org?.name || 'Workspace'}</h1>
+            <p>Connect QuickBooks Online to fetch invoices and post to PRA.</p>
+          </div>
+        </div>
+        <QboConnectPrompt
+          companyName={data.org?.name}
+          returnPath="/app/connections"
+          authUrlPath="/customer/qbo/auth-url"
+        />
+      </>
+    );
+  }
+
   return (
     <>
       <div className="topbar">
@@ -858,6 +877,7 @@ function MappingSectionTable({
   section,
   rows,
   availableKeys,
+  targetColumnLabel = 'PRA key',
   onSwap,
   onMove,
   onChangeSource,
@@ -867,6 +887,7 @@ function MappingSectionTable({
   section: 'HEADER' | 'LINE';
   rows: any[];
   availableKeys: string[];
+  targetColumnLabel?: string;
   onSwap: (fromId: string, toId: string) => void;
   onMove: (id: string, direction: 'up' | 'down') => void;
   onChangeSource: (id: string, sourceField: string) => void;
@@ -884,7 +905,7 @@ function MappingSectionTable({
         <thead>
           <tr>
             <th style={{ width: 56 }}>#</th>
-            <th>PRA key</th>
+            <th>{targetColumnLabel}</th>
             <th>QBO key (drag to swap)</th>
             <th>Sample value</th>
             <th>Required</th>
@@ -1020,6 +1041,42 @@ const PRA_LINE_ORDER = [
   'RefUSIN',
 ];
 
+const FBR_HEADER_ORDER = [
+  'invoiceType',
+  'invoiceDate',
+  'sellerNTNCNIC',
+  'sellerBusinessName',
+  'sellerProvince',
+  'sellerAddress',
+  'buyerNTNCNIC',
+  'buyerBusinessName',
+  'buyerProvince',
+  'buyerAddress',
+  'buyerRegistrationType',
+  'invoiceRefNo',
+  'scenarioId',
+];
+
+const FBR_LINE_ORDER = [
+  'hsCode',
+  'productDescription',
+  'rate',
+  'uoM',
+  'quantity',
+  'valueSalesExcludingST',
+  'salesTaxApplicable',
+  'totalValues',
+  'fixedNotifiedValueOrRetailPrice',
+  'salesTaxWithheldAtSource',
+  'extraTax',
+  'furtherTax',
+  'sroScheduleNo',
+  'fedPayable',
+  'discount',
+  'saleType',
+  'sroItemSerialNo',
+];
+
 function sortRowsByPraOrder(rows: any[], order: string[]) {
   const rank = new Map(order.map((key, idx) => [key, idx]));
   return [...rows].sort((a, b) => {
@@ -1039,6 +1096,13 @@ function applyValueLookup(rows: any[], lookup: Record<string, any>) {
 }
 
 export function CustomerMappingsPage() {
+  const { integrationMode } = useAuth();
+  const isFbr = integrationMode === 'FBR';
+  const apiBase = isFbr ? '/fbr/customer' : '/customer';
+  const connectionsPath = isFbr ? '/fbr/app/connections' : '/app/connections';
+  const targetLabel = isFbr ? 'FBR key' : 'PRA key';
+  const headerOrder = isFbr ? FBR_HEADER_ORDER : PRA_HEADER_ORDER;
+  const lineOrder = isFbr ? FBR_LINE_ORDER : PRA_LINE_ORDER;
   const [workspace, setWorkspace] = useState<any>(null);
   const [header, setHeader] = useState<any[]>([]);
   const [lines, setLines] = useState<any[]>([]);
@@ -1051,8 +1115,8 @@ export function CustomerMappingsPage() {
   const [saving, setSaving] = useState(false);
 
   function hydrate(data: any) {
-    const nextHeader = sortRowsByPraOrder(data.header || [], PRA_HEADER_ORDER);
-    const nextLines = sortRowsByPraOrder(data.lines || [], PRA_LINE_ORDER);
+    const nextHeader = sortRowsByPraOrder(data.header || [], headerOrder);
+    const nextLines = sortRowsByPraOrder(data.lines || [], lineOrder);
     setWorkspace(data);
     setHeader(nextHeader);
     setLines(nextLines);
@@ -1067,7 +1131,7 @@ export function CustomerMappingsPage() {
     setMsg('');
     try {
       const q = selected ? `?invoiceId=${encodeURIComponent(selected)}` : '';
-      const data = await api(`/customer/mappings/workspace${q}`);
+      const data = await api(`${apiBase}/mappings/workspace${q}`);
       hydrate(data);
     } catch (e: any) {
       setError(e.message);
@@ -1145,7 +1209,7 @@ export function CustomerMappingsPage() {
         id: r.id,
         sourceField: r.qboKey ?? '',
       }));
-      const next = await api('/customer/mappings/save', {
+      const next = await api(`${apiBase}/mappings/save`, {
         method: 'POST',
         body: JSON.stringify({ items, invoiceId: invoiceId || undefined }),
       });
@@ -1166,7 +1230,8 @@ export function CustomerMappingsPage() {
         <div>
           <h1>Keys configuration</h1>
           <p>
-            Adjust QBO keys against PRA header/line fields, then click Save to persist.
+            Adjust QBO keys against {isFbr ? 'FBR DI' : 'PRA'} header/line fields, then click Save
+            to persist.
           </p>
         </div>
         <div style={{ display: 'flex', gap: 8, alignItems: 'center' }}>
@@ -1220,7 +1285,7 @@ export function CustomerMappingsPage() {
           >
             {busy ? 'Refreshing…' : 'Refresh sample'}
           </button>
-          <Link className="btn btn-ghost" to="/app/connections">
+          <Link className="btn btn-ghost" to={connectionsPath}>
             Connections
           </Link>
         </div>
@@ -1239,10 +1304,11 @@ export function CustomerMappingsPage() {
         <>
           <MappingSectionTable
             title="Header fields"
-            hint="Invoice-level PRA payload"
+            hint={isFbr ? 'Invoice-level FBR DI payload' : 'Invoice-level PRA payload'}
             section="HEADER"
             rows={header}
             availableKeys={workspace.availableQboKeys || []}
+            targetColumnLabel={targetLabel}
             onSwap={(fromId, toId) => swapLocal('HEADER', fromId, toId)}
             onMove={(id, direction) => moveLocal('HEADER', id, direction)}
             onChangeSource={(id, sourceField) => changeSourceLocal('HEADER', id, sourceField)}
@@ -1250,10 +1316,15 @@ export function CustomerMappingsPage() {
 
           <MappingSectionTable
             title="Line item fields"
-            hint="Repeating Items[] PRA payload (values from first sales line)"
+            hint={
+              isFbr
+                ? 'Repeating items[] FBR payload (sample from first sales line)'
+                : 'Repeating Items[] PRA payload (values from first sales line)'
+            }
             section="LINE"
             rows={lines}
             availableKeys={workspace.availableQboKeys || []}
+            targetColumnLabel={targetLabel}
             onSwap={(fromId, toId) => swapLocal('LINE', fromId, toId)}
             onMove={(id, direction) => moveLocal('LINE', id, direction)}
             onChangeSource={(id, sourceField) => changeSourceLocal('LINE', id, sourceField)}
@@ -1621,10 +1692,12 @@ export function CustomerInvoicesPage() {
 }
 
 export function CustomerLogsPage() {
+  const { integrationMode } = useAuth();
   const [rows, setRows] = useState<any[]>([]);
   useEffect(() => {
-    api('/customer/logs').then(setRows);
-  }, []);
+    const path = integrationMode === 'FBR' ? '/fbr/customer/logs' : '/customer/logs';
+    api(path).then(setRows);
+  }, [integrationMode]);
   return (
     <>
       <div className="topbar">
