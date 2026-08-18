@@ -135,13 +135,10 @@ export function FiscalInvoiceReportPage() {
     setError('');
     setMsg('');
     try {
-      const result = await api('/customer/invoices/attach-fiscal', {
+      const result = await api('/customer/invoices/post-pra', {
         method: 'POST',
         body: JSON.stringify({
           qboInvoiceId: String(invoice.Id),
-          usin: invoice.DocNumber || String(invoice.Id),
-          customerName: invoice.CustomerRef?.name || undefined,
-          totalAmount: invoice.TotalAmt != null ? Number(invoice.TotalAmt) : undefined,
           writeToQbo: true,
         }),
       });

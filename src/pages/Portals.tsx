@@ -1507,19 +1507,15 @@ export function CustomerInvoicesPage() {
     setMsg('');
     try {
       const results = await Promise.allSettled(
-        selectedIds.map((qboInvoiceId) => {
-          const inv = qboInvoices.find((row) => String(row.Id) === qboInvoiceId);
-          return api('/customer/invoices/attach-fiscal', {
+        selectedIds.map((qboInvoiceId) =>
+          api('/customer/invoices/post-pra', {
             method: 'POST',
             body: JSON.stringify({
               qboInvoiceId,
-              usin: inv?.DocNumber || qboInvoiceId,
-              customerName: inv?.CustomerRef?.name || undefined,
-              totalAmount: inv?.TotalAmt != null ? Number(inv.TotalAmt) : undefined,
               writeToQbo: true,
             }),
-          });
-        }),
+          }),
+        ),
       );
       const ok = results.filter((r) => r.status === 'fulfilled').length;
       const failed = results.length - ok;

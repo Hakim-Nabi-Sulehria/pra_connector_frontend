@@ -1726,6 +1726,88 @@ textarea {
   color: var(--ink);
 }
 
+.invoice-detail-input {
+  width: 100%;
+  min-height: 32px;
+  padding: 7px 10px;
+  border: 1px solid #9ec5cf;
+  border-radius: 8px;
+  background: #fff;
+  font-size: 0.8125rem;
+  color: var(--ink);
+}
+
+.invoice-detail-input:focus {
+  outline: 2px solid rgba(0, 132, 137, 0.25);
+  border-color: #008489;
+}
+
+.invoice-table-input {
+  width: 100%;
+  min-width: 56px;
+  padding: 4px 6px;
+  border: 1px solid #9ec5cf;
+  border-radius: 6px;
+  background: #fff;
+  font-size: 0.75rem;
+}
+
+.invoice-table-input:focus {
+  outline: 2px solid rgba(0, 132, 137, 0.2);
+  border-color: #008489;
+}
+
+.confirm-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 1000;
+  display: grid;
+  place-items: center;
+  background: rgba(15, 23, 42, 0.45);
+  padding: 16px;
+}
+
+.confirm-card {
+  width: min(440px, 100%);
+  background: #fff;
+  border-radius: 12px;
+  padding: 20px;
+  box-shadow: 0 16px 40px rgba(15, 23, 42, 0.18);
+}
+
+.confirm-card h3 {
+  margin: 0 0 8px;
+  font-size: 1rem;
+}
+
+.confirm-card p {
+  margin: 0 0 16px;
+  color: var(--muted);
+  font-size: 0.875rem;
+  line-height: 1.5;
+}
+
+.confirm-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 8px;
+}
+
+.pra-response-card {
+  margin-bottom: 12px;
+}
+
+.pra-response-card pre {
+  margin: 8px 0 0;
+  padding: 10px;
+  background: #f8fafc;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  font-size: 0.75rem;
+  overflow: auto;
+  max-height: 180px;
+}
+
 .address-stack {
   display: flex;
   flex-direction: column;
