@@ -44,7 +44,7 @@ export function AdminLayout({ mode = 'PRA' }: { mode?: IntegrationMode }) {
   }, [mode, switchMode]);
 
   return (
-    <div className={`portal-shell dense-portal${mode === 'FBR' ? ' theme-di' : ''}`}>
+    <div className="portal-shell dense-portal">
       <aside className="sidebar">
         <div className="brand">
           <BrandMark />
