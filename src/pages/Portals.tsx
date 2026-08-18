@@ -1397,6 +1397,7 @@ export function CustomerInvoicesPage() {
   const [connected, setConnected] = useState(false);
   const [loaded, setLoaded] = useState(false);
   const [selected, setSelected] = useState<Record<string, boolean>>({});
+  const [statusFilter, setStatusFilter] = useState<'all' | 'posted' | 'unposted'>('all');
 
   async function load() {
     setBusy(true);
@@ -1434,9 +1435,24 @@ export function CustomerInvoicesPage() {
     [tracked],
   );
 
+  function praStatusOf(inv: any) {
+    const id = String(inv?.Id || '');
+    return String(trackedByQboId.get(id)?.status || 'PENDING').toUpperCase();
+  }
+
+  const visibleInvoices = useMemo(() => {
+    if (statusFilter === 'posted') {
+      return qboInvoices.filter((inv) => praStatusOf(inv) === 'POSTED');
+    }
+    if (statusFilter === 'unposted') {
+      return qboInvoices.filter((inv) => praStatusOf(inv) !== 'POSTED');
+    }
+    return qboInvoices;
+  }, [qboInvoices, statusFilter, trackedByQboId]);
+
   const ids = useMemo(
-    () => qboInvoices.map((inv) => String(inv.Id)).filter(Boolean),
-    [qboInvoices],
+    () => visibleInvoices.map((inv) => String(inv.Id)).filter(Boolean),
+    [visibleInvoices],
   );
   const selectedIds = useMemo(
     () => ids.filter((id) => selected[id]),
@@ -1561,7 +1577,13 @@ export function CustomerInvoicesPage() {
         <div className="di-invoice-panel">
           <div className="di-invoice-toolbar">
             <div>
-              <strong>{qboInvoices.length}</strong> invoice(s)
+              <strong>{visibleInvoices.length}</strong> invoice(s)
+              {statusFilter !== 'all' ? (
+                <>
+                  {' '}
+                  · {statusFilter === 'posted' ? 'Posted' : 'Unposted'}
+                </>
+              ) : null}
               {selectedIds.length > 0 ? (
                 <>
                   {' '}
@@ -1569,14 +1591,48 @@ export function CustomerInvoicesPage() {
                 </>
               ) : null}
             </div>
-            <button
-              type="button"
-              className="btn btn-ghost"
-              disabled={!ids.length}
-              onClick={toggleAll}
-            >
-              {allSelected ? 'Clear selection' : 'Select all'}
-            </button>
+            <div className="invoice-filter-actions">
+              <div className="env-segment" aria-label="Invoice status filter">
+                <button
+                  type="button"
+                  className={statusFilter === 'all' ? 'active' : ''}
+                  onClick={() => {
+                    setStatusFilter('all');
+                    setSelected({});
+                  }}
+                >
+                  All
+                </button>
+                <button
+                  type="button"
+                  className={statusFilter === 'posted' ? 'active' : ''}
+                  onClick={() => {
+                    setStatusFilter('posted');
+                    setSelected({});
+                  }}
+                >
+                  Posted
+                </button>
+                <button
+                  type="button"
+                  className={statusFilter === 'unposted' ? 'active' : ''}
+                  onClick={() => {
+                    setStatusFilter('unposted');
+                    setSelected({});
+                  }}
+                >
+                  Unposted
+                </button>
+              </div>
+              <button
+                type="button"
+                className="btn btn-ghost"
+                disabled={!ids.length}
+                onClick={toggleAll}
+              >
+                {allSelected ? 'Clear selection' : 'Select all'}
+              </button>
+            </div>
           </div>
 
           <div className="di-invoice-scroll">
@@ -1605,7 +1661,7 @@ export function CustomerInvoicesPage() {
                 </tr>
               </thead>
               <tbody>
-                {qboInvoices.map((inv) => {
+                {visibleInvoices.map((inv) => {
                   const id = String(inv.Id);
                   const track = trackedByQboId.get(id);
                   const fiscal =
@@ -1648,10 +1704,12 @@ export function CustomerInvoicesPage() {
                     </tr>
                   );
                 })}
-                {!qboInvoices.length && (
+                {!visibleInvoices.length && (
                   <tr>
                     <td colSpan={9} className="empty-cell">
-                      No invoices returned from QuickBooks.
+                      {qboInvoices.length
+                        ? 'No invoices match this filter.'
+                        : 'No invoices returned from QuickBooks.'}
                     </td>
                   </tr>
                 )}

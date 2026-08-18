@@ -1831,6 +1831,13 @@ textarea {
   color: var(--muted);
 }
 
+.invoice-filter-actions {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
 .di-invoice-scroll {
   overflow-x: auto;
 }
