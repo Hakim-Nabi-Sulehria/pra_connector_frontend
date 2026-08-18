@@ -11,6 +11,17 @@ export function IntegrationModeTabs({ mode, admin }: Props) {
   const { switchMode } = useAuth();
   const praPath = admin ? '/admin' : '/login';
   const fbrPath = admin ? '/admin/fbr' : '/login';
+  const adminTabStyle = (active: boolean) =>
+    admin
+      ? {
+          flex: 1,
+          textAlign: 'center' as const,
+          borderColor: active ? 'rgba(20,184,166,0.42)' : 'rgba(255,255,255,0.18)',
+          background: active ? 'rgba(20,184,166,0.18)' : 'rgba(255,255,255,0.06)',
+          color: '#fff',
+          fontWeight: 700,
+        }
+      : { flex: 1, textAlign: 'center' as const };
 
   return (
     <div className="mode-tabs" style={{ display: 'flex', gap: 8, marginBottom: 16 }}>
@@ -18,7 +29,7 @@ export function IntegrationModeTabs({ mode, admin }: Props) {
         to={praPath}
         end={admin}
         className={`btn ${mode === 'PRA' ? 'btn-primary' : 'btn-ghost'}`}
-        style={{ flex: 1, textAlign: 'center' }}
+        style={adminTabStyle(mode === 'PRA')}
         onClick={() => {
           setIntegrationMode('PRA');
           switchMode?.('PRA');
@@ -30,7 +41,7 @@ export function IntegrationModeTabs({ mode, admin }: Props) {
         to={fbrPath}
         end={admin}
         className={`btn ${mode === 'FBR' ? 'btn-primary' : 'btn-ghost'}`}
-        style={{ flex: 1, textAlign: 'center' }}
+        style={adminTabStyle(mode === 'FBR')}
         onClick={() => {
           setIntegrationMode('FBR');
           switchMode?.('FBR');

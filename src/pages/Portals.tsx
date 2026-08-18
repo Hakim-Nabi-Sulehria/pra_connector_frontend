@@ -1253,6 +1253,25 @@ export function CustomerMappingsPage() {
         </div>
       )}
 
+      {!isFbr && (
+        <div className="card" style={{ marginBottom: 16 }}>
+          <div className="step-list">
+            <div className="step-item">
+              <span>Admin-managed PRA POS ID</span>
+              <strong>{workspace?.header?.find((row: any) => row.praKey === 'POSID')?.value || 'Not configured'}</strong>
+            </div>
+            <div className="step-item">
+              <span>Source in mappings</span>
+              <strong className="mono">pra.posId</strong>
+            </div>
+          </div>
+          <p className="map-hint" style={{ marginTop: 12, marginBottom: 0 }}>
+            This POS ID is set only in the Super Admin PRA company profile. Customer workspace can view
+            it here but cannot edit it.
+          </p>
+        </div>
+      )}
+
       <div className="card" style={{ marginBottom: 16 }}>
         <div className="toolbar">
           <StatusBadge status={workspace?.connected ? 'CONNECTED' : 'DISCONNECTED'} />

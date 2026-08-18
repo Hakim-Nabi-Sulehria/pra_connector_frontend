@@ -252,6 +252,7 @@ type CompanyFormState = {
   companyName: string;
   companyEmail: string;
   password: string;
+  posId: string;
   praApiUrl: string;
   praToken: string;
   environment: 'sandbox' | 'production';
@@ -334,6 +335,20 @@ function CompanyFormFields({
           </button>
         </div>
       </div>
+      {form.environment === 'production' && (
+        <div className="field">
+          <label>PRA POS ID</label>
+          <input
+            value={form.posId}
+            onChange={(e) => setForm({ ...form, posId: e.target.value })}
+            placeholder="Admin-managed POS ID for PRA production"
+            disabled={disabled}
+          />
+          <p className="field-hint">
+            This value is managed by Super Admin and appears in PRA keys configuration as `pra.posId`.
+          </p>
+        </div>
+      )}
       <div className="field">
         <label>PRA API URL</label>
         <input
@@ -370,6 +385,7 @@ export function AdminCompanyCreatePage() {
     companyName: '',
     companyEmail: '',
     password: '',
+      posId: '',
     praApiUrl: DEFAULT_PRA.sandbox,
     praToken: '',
     environment: 'sandbox',
@@ -444,6 +460,7 @@ export function AdminCompanyDetailPage() {
         companyName: data.name || '',
         companyEmail: data.adminEmail || '',
         password: '',
+        posId: data.pra?.posId || '',
         praApiUrl: data.pra?.apiUrl || DEFAULT_PRA[(data.pra?.environment === 'production' ? 'production' : 'sandbox')],
         praToken: '',
         environment: data.pra?.environment === 'production' ? 'production' : 'sandbox',
@@ -469,6 +486,7 @@ export function AdminCompanyDetailPage() {
       const body: Record<string, string> = {
         companyName: form.companyName,
         companyEmail: form.companyEmail,
+        posId: form.posId,
         praApiUrl: form.praApiUrl,
         environment: form.environment,
       };
@@ -484,6 +502,7 @@ export function AdminCompanyDetailPage() {
         companyName: updated.name || '',
         companyEmail: updated.adminEmail || '',
         password: '',
+        posId: updated.pra?.posId || '',
         praApiUrl: updated.pra?.apiUrl || DEFAULT_PRA[(updated.pra?.environment === 'production' ? 'production' : 'sandbox')],
         praToken: '',
         environment: updated.pra?.environment === 'production' ? 'production' : 'sandbox',
@@ -547,6 +566,11 @@ export function AdminCompanyDetailPage() {
               {(company.pra?.environment || 'sandbox').toUpperCase()}
               {company.pra?.hasToken ? ' · token configured' : ' · no token'}
             </div>
+            {company.pra?.environment === 'production' && company.pra?.posId && (
+              <div style={{ color: 'var(--muted)', fontSize: 13, marginTop: 6 }}>
+                POS ID: <strong>{company.pra.posId}</strong>
+              </div>
+            )}
           </div>
         </div>
       </div>
@@ -576,6 +600,7 @@ export function AdminCompanyDetailPage() {
                     companyName: company.name || '',
                     companyEmail: company.adminEmail || '',
                     password: '',
+                    posId: company.pra?.posId || '',
                     praApiUrl:
                       company.pra?.apiUrl ||
                       DEFAULT_PRA[(company.pra?.environment === 'production' ? 'production' : 'sandbox')],
