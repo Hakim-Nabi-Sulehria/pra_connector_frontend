@@ -51,7 +51,7 @@ type AuthState = {
     integrationMode?: IntegrationMode;
   }) => Promise<User>;
   logout: () => void;
-  refresh: () => Promise<void>;
+  refresh: () => Promise<User | null>;
   switchMode: (mode: IntegrationMode) => void;
 };
 
@@ -63,33 +63,45 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const [integrationMode, setMode] = useState<IntegrationMode>(getIntegrationMode());
   const [loading, setLoading] = useState(true);
 
-  const refresh = useCallback(async () => {
+  const refresh = useCallback(async (): Promise<User | null> => {
     if (!getToken()) {
       setUser(null);
       setLoading(false);
-      return;
+      return null;
     }
-    try {
-      const me = await api<User>('/auth/me');
-      setUser(me);
-      setPortal(getPortal());
-      // Super Admin keeps the in-app PRA/FBR tab; do not reset it from JWT.
-      if (getPortal() === 'admin' && me.role === 'SUPER_ADMIN') {
-        setMode(getIntegrationMode());
-      } else {
-        const mode = me.integrationMode || getIntegrationMode();
-        setMode(mode);
-        setIntegrationMode(mode);
+    const attempts = 4;
+    for (let attempt = 0; attempt < attempts; attempt++) {
+      try {
+        const me = await api<User>('/auth/me');
+        setUser(me);
+        setPortal(getPortal());
+        // Super Admin keeps the in-app PRA/FBR tab; do not reset it from JWT.
+        if (getPortal() === 'admin' && me.role === 'SUPER_ADMIN') {
+          setMode(getIntegrationMode());
+        } else {
+          const mode = me.integrationMode || getIntegrationMode();
+          setMode(mode);
+          setIntegrationMode(mode);
+        }
+        setLoading(false);
+        return me;
+      } catch (err) {
+        if (err instanceof ApiError && (err.status === 401 || err.status === 403)) {
+          clearSession();
+          setUser(null);
+          setPortal(null);
+          setLoading(false);
+          return null;
+        }
+        if (attempt < attempts - 1) {
+          await new Promise((r) => setTimeout(r, 1200 * (attempt + 1)));
+          continue;
+        }
       }
-    } catch (err) {
-      if (err instanceof ApiError && (err.status === 401 || err.status === 403)) {
-        clearSession();
-        setUser(null);
-        setPortal(null);
-      }
-    } finally {
-      setLoading(false);
     }
+    // Keep the token. Render cold-starts after Intuit Approve must not log the user out.
+    setLoading(false);
+    return null;
   }, []);
 
   useEffect(() => {

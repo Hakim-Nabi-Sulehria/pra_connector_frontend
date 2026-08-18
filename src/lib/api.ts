@@ -24,32 +24,44 @@ const API_BASE = (
   (import.meta.env.DEV ? '' : DEFAULT_PROD_API)
 );
 
+function readStore(key: string) {
+  return localStorage.getItem(key) || sessionStorage.getItem(key);
+}
+
 export function getToken() {
-  return localStorage.getItem(TOKEN_KEY);
+  return readStore(TOKEN_KEY);
 }
 
 export function setSession(token: string, portal: Portal, mode: IntegrationMode = 'PRA') {
   localStorage.setItem(TOKEN_KEY, token);
   localStorage.setItem(PORTAL_KEY, portal);
   localStorage.setItem(MODE_KEY, mode);
+  sessionStorage.setItem(TOKEN_KEY, token);
+  sessionStorage.setItem(PORTAL_KEY, portal);
+  sessionStorage.setItem(MODE_KEY, mode);
 }
 
 export function clearSession() {
   localStorage.removeItem(TOKEN_KEY);
   localStorage.removeItem(PORTAL_KEY);
   localStorage.removeItem(MODE_KEY);
+  sessionStorage.removeItem(TOKEN_KEY);
+  sessionStorage.removeItem(PORTAL_KEY);
+  sessionStorage.removeItem(MODE_KEY);
+  sessionStorage.removeItem('qbo_oauth_resume');
 }
 
 export function getPortal(): Portal | null {
-  return (localStorage.getItem(PORTAL_KEY) as Portal) || null;
+  return (readStore(PORTAL_KEY) as Portal) || null;
 }
 
 export function getIntegrationMode(): IntegrationMode {
-  return (localStorage.getItem(MODE_KEY) as IntegrationMode) || 'PRA';
+  return (readStore(MODE_KEY) as IntegrationMode) || 'PRA';
 }
 
 export function setIntegrationMode(mode: IntegrationMode) {
   localStorage.setItem(MODE_KEY, mode);
+  sessionStorage.setItem(MODE_KEY, mode);
 }
 
 async function fetchWithRetry(url: string, options: RequestInit, retries = 2) {

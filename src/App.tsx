@@ -1,5 +1,6 @@
 import { Navigate, Outlet, Route, Routes } from 'react-router-dom';
 import { AuthProvider, useAuth } from './auth';
+import { type IntegrationMode } from './lib/api';
 import { AdminLayout, CustomerLayout, FbrCustomerLayout } from './layouts/Shell';
 import {
   AdminLoginPage,
@@ -39,7 +40,7 @@ import {
 import { FiscalInvoiceReportPage } from './pages/FiscalInvoiceReport';
 import { InvoiceDetailPage } from './pages/InvoiceDetail';
 import { PrivacyPage, TermsPage } from './pages/LegalPages';
-import type { IntegrationMode } from './lib/api';
+import { OAuthQboResumePage } from './pages/OAuthQboResumePage';
 
 function Guard({
   portal,
@@ -49,13 +50,20 @@ function Guard({
   mode: IntegrationMode;
 }) {
   const { user, loading, portal: active, integrationMode } = useAuth();
-  if (loading) return <p style={{ padding: 40 }}>Loading session…</p>;
+  if (loading) {
+    return <p className="session-restoring">Restoring session…</p>;
+  }
   if (!user || active !== portal) {
     if (portal === 'admin') return <Navigate to="/admin/login" replace />;
     return <Navigate to="/login" replace />;
   }
   if (portal === 'customer' && integrationMode !== mode) {
-    return <Navigate to="/login" replace />;
+    return (
+      <Navigate
+        to={integrationMode === 'FBR' ? '/fbr/app/connections' : '/app/connections'}
+        replace
+      />
+    );
   }
   if (portal === 'admin' && user.role !== 'SUPER_ADMIN') {
     return <Navigate to="/login" replace />;
@@ -77,6 +85,7 @@ export default function App() {
         <Route path="/reset-password" element={<ResetPasswordRequestPage />} />
         <Route path="/reset-password/otp" element={<ResetPasswordOtpPage />} />
         <Route path="/reset-password/update" element={<ResetPasswordUpdatePage />} />
+        <Route path="/oauth/qbo" element={<OAuthQboResumePage />} />
         <Route path="/terms" element={<TermsPage />} />
         <Route path="/privacy" element={<PrivacyPage />} />
 

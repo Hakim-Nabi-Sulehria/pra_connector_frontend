@@ -55,15 +55,17 @@ function AuthShell({
   children,
   visualTitle,
   visualBody,
+  variant = 'pra',
 }: {
   title: string;
   hint: string;
   children: React.ReactNode;
   visualTitle: string;
   visualBody: string;
+  variant?: 'pra' | 'fbr';
 }) {
   return (
-    <div className="auth-page">
+    <div className={`auth-page${variant === 'fbr' ? ' theme-di-auth' : ''}`}>
       <div className="auth-visual">
         <div>
           <div style={{ opacity: 0.7, marginBottom: 18, fontWeight: 700 }}>
@@ -146,9 +148,10 @@ export function AdminLoginPage() {
 export function CustomerLoginPage() {
   const { login, user, portal, integrationMode, loading } = useAuth();
   const navigate = useNavigate();
-  const [mode, setMode] = useState<IntegrationMode>('PRA');
-  const [email, setEmail] = useState('pratestuser@qboconnector.com');
-  const [password, setPassword] = useState('Pratest@12345');
+  const [searchParams] = useSearchParams();
+  const [mode, setMode] = useState<IntegrationMode>('FBR');
+  const [email, setEmail] = useState('fbrtestuser@qboconnector.com');
+  const [password, setPassword] = useState('Fbrtest@12345');
   const [error, setError] = useState('');
   const [busy, setBusy] = useState(false);
   const [captcha, setCaptcha] = useState(() => {
@@ -159,8 +162,8 @@ export function CustomerLoginPage() {
   const [captchaInput, setCaptchaInput] = useState('');
   const captchaOk = captchaInput.trim() === String(captcha.a + captcha.b);
 
-  if (!loading && user && portal === 'customer' && integrationMode === mode) {
-    return <Navigate to={mode === 'FBR' ? '/fbr/app' : '/app'} replace />;
+  if (!loading && user && portal === 'customer') {
+    return <Navigate to={integrationMode === 'FBR' ? '/fbr/app' : '/app'} replace />;
   }
 
   async function onSubmit(e: FormEvent) {
@@ -183,6 +186,7 @@ export function CustomerLoginPage() {
 
   return (
     <AuthShell
+      variant={mode === 'FBR' ? 'fbr' : 'pra'}
       title="Customer workspace"
       hint={
         mode === 'FBR'
@@ -210,6 +214,16 @@ export function CustomerLoginPage() {
         }}
       />
       <form onSubmit={onSubmit}>
+        {searchParams.get('qbo') === 'connected' && (
+          <div className="card flash-ok" style={{ marginBottom: 14 }}>
+            QuickBooks was approved. Sign in to open your workspace.
+          </div>
+        )}
+        {searchParams.get('qbo') === 'error' && (
+          <div className="error-box">
+            {searchParams.get('message') || 'QuickBooks connection failed'}
+          </div>
+        )}
         {error && <div className="error-box">{error}</div>}
         <div className="field">
           <label>Work email</label>
@@ -323,6 +337,7 @@ export function RegisterPage() {
 
   return (
     <AuthShell
+      variant={mode === 'FBR' ? 'fbr' : 'pra'}
       title="Create your organization"
       hint={
         mode === 'FBR'

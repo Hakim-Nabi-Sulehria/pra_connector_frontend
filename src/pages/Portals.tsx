@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { api } from '../lib/api';
+import { startQboOAuth } from '../lib/qbo-oauth';
 import { useAuth } from '../auth';
 import { PageLoader } from '../components/PageLoader';
 import { QboConnectPrompt } from '../components/QboConnectPrompt';
@@ -706,11 +707,7 @@ export function CustomerConnectionsPage() {
                 setBusy(true);
                 setErr('');
                 try {
-                  const returnOrigin = encodeURIComponent(window.location.origin);
-                  const { url } = await api<{ url: string }>(
-                    `/customer/qbo/auth-url?returnOrigin=${returnOrigin}`,
-                  );
-                  window.location.href = url;
+                  await startQboOAuth('/customer/qbo/auth-url', '/app/connections');
                 } catch (e: any) {
                   setErr(e.message);
                   setBusy(false);

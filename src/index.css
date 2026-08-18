@@ -1445,6 +1445,219 @@ textarea {
   height: 7px;
 }
 
+.dense-portal .btn-signout {
+  width: 100%;
+  color: #fff;
+  border-color: rgba(255, 255, 255, 0.2);
+}
+
+.session-restoring {
+  padding: 40px;
+  text-align: center;
+  color: var(--muted);
+}
+
+.oauth-resume {
+  min-height: 100vh;
+  display: grid;
+  place-items: center;
+  background: #f5f7fa;
+  font-family: "Segoe UI", system-ui, sans-serif;
+}
+
+.oauth-resume-card {
+  width: min(420px, calc(100% - 32px));
+  background: #fff;
+  border: 1px solid #e8e8e8;
+  border-radius: 8px;
+  padding: 32px 28px;
+  text-align: center;
+  box-shadow: 0 8px 24px rgba(21, 26, 31, 0.06);
+}
+
+.oauth-resume-mark {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 48px;
+  height: 48px;
+  margin-bottom: 14px;
+  border-radius: 10px;
+  background: #008489;
+  color: #fff;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+}
+
+.oauth-resume-card h1 {
+  margin: 0 0 8px;
+  font-size: 1.1rem;
+  color: #151a1f;
+}
+
+.oauth-resume-card p {
+  margin: 0;
+  color: #3a4149;
+  font-size: 0.9rem;
+}
+
+.theme-di-auth .auth-visual {
+  background: linear-gradient(155deg, #004d50 0%, #007a7e 38%, #008489 68%, #5eb3b6 100%);
+}
+
+.theme-di-auth .auth-visual h1,
+.theme-di-auth .auth-card h2 {
+  font-family: "Segoe UI", system-ui, sans-serif;
+}
+
+.theme-di-auth .auth-card {
+  border-radius: 12px;
+  box-shadow: 0 12px 32px rgba(0, 77, 80, 0.1);
+}
+
+.theme-di-auth .btn-primary {
+  background: #008489;
+  box-shadow: 0 8px 18px rgba(0, 132, 137, 0.28);
+}
+
+.theme-di {
+  --ink: #151a1f;
+  --ink-soft: #151a1f;
+  --teal: #008489;
+  --teal-bright: #008489;
+  --mist: #f5f7fa;
+  --panel: #ffffff;
+  --panel-solid: #ffffff;
+  --line: #e8e8e8;
+  --muted: #3a4149;
+  --ok: #047857;
+  --radius: 0.35rem;
+  --font-display: "Segoe UI", system-ui, sans-serif;
+  --font-body: "Segoe UI", system-ui, sans-serif;
+  --shadow: 0 1px 2px rgba(21, 26, 31, 0.06);
+  --admin-radius: 0.25rem;
+  font-family: var(--font-body);
+  background: #f5f7fa;
+}
+
+.theme-di .sidebar {
+  background: #ffffff;
+  color: #151a1f;
+  border-right: 1px solid #e8e8e8;
+  padding: 16px 12px;
+}
+
+.theme-di .brand-mark {
+  color: #008489;
+  font-family: inherit;
+}
+
+.theme-di .brand-mark span {
+  color: #007a7e;
+}
+
+.theme-di .brand-sub {
+  color: #3a4149;
+  opacity: 1;
+}
+
+.theme-di .nav-link {
+  color: #151a1f;
+  border-radius: 0.25rem;
+}
+
+.theme-di .nav-link:hover {
+  background: #e3edf7;
+  color: #151a1f;
+}
+
+.theme-di .nav-link.active {
+  background: #e3edf7;
+  color: #008489;
+}
+
+.theme-di .sidebar-footer {
+  background: #f5f7fa;
+  color: #151a1f;
+  border-radius: 0.25rem;
+}
+
+.theme-di .sidebar-user-org,
+.theme-di .sidebar-user-email {
+  opacity: 0.78;
+}
+
+.theme-di .btn-signout {
+  color: #151a1f;
+  border-color: #d5dde5;
+}
+
+.theme-di .main {
+  background: #f5f7fa;
+}
+
+.theme-di .topbar h1 {
+  font-family: inherit;
+  font-size: 0.98rem;
+  letter-spacing: 0;
+  font-weight: 650;
+}
+
+.theme-di .topbar p {
+  font-size: 0.8rem;
+}
+
+.theme-di .crumb {
+  font-size: 0.72rem;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+}
+
+.theme-di .card {
+  backdrop-filter: none;
+  border-radius: 0.35rem;
+  box-shadow: 0 1px 2px rgba(21, 26, 31, 0.05);
+}
+
+.theme-di .card h3 {
+  font-family: inherit;
+  font-size: 0.9rem;
+}
+
+.theme-di .kpi-value {
+  font-family: inherit;
+  font-size: 1.2rem;
+}
+
+.theme-di .kpi-card::after {
+  background: rgba(0, 132, 137, 0.1);
+}
+
+.theme-di .table {
+  font-size: 0.78rem;
+}
+
+.theme-di .table th {
+  background: #e0e6ed;
+  text-transform: none;
+  letter-spacing: 0;
+  font-size: 0.72rem;
+}
+
+.theme-di .btn-primary {
+  background: #008489;
+  box-shadow: 0 4px 12px rgba(0, 132, 137, 0.22);
+}
+
+.theme-di .clickable-row:hover {
+  background: rgba(0, 132, 137, 0.06);
+}
+
+.theme-di .qbo-connect-card h2 {
+  font-family: inherit;
+  font-size: 1.05rem;
+}
+
 .invoice-detail-page {
   display: flex;
   flex-direction: column;

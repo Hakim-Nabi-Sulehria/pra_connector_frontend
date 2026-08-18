@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { Activity, AlertTriangle, Building2, CheckCircle2, Plug } from 'lucide-react';
 import { api } from '../lib/api';
+import { startQboOAuth } from '../lib/qbo-oauth';
 import { useAuth } from '../auth';
 import { PageLoader } from '../components/PageLoader';
 import { QboConnectPrompt } from '../components/QboConnectPrompt';
@@ -226,6 +227,7 @@ export function FbrCustomerDashboardPage() {
       <>
         <div className="topbar">
           <div>
+            <div className="crumb">FBR workspace</div>
             <h1>{data.org?.name || 'FBR workspace'}</h1>
             <p>Connect QuickBooks Online to fetch invoices and post to FBR DI.</p>
           </div>
@@ -243,6 +245,7 @@ export function FbrCustomerDashboardPage() {
     <>
       <div className="topbar">
         <div>
+          <div className="crumb">FBR workspace</div>
           <h1>{data.org?.name}</h1>
           <p>QuickBooks → FBR DI validate/post. FBR invoice numbers stay isolated from PRA.</p>
         </div>
@@ -389,6 +392,7 @@ export function FbrCustomerConnectionsPage() {
     <>
       <div className="topbar">
         <div>
+          <div className="crumb">FBR workspace</div>
           <h1>Connections</h1>
           <p>Connect QuickBooks. FBR seller identity and token are managed by Super Admin.</p>
         </div>
@@ -418,11 +422,7 @@ export function FbrCustomerConnectionsPage() {
                 setBusy(true);
                 setErr('');
                 try {
-                  const returnOrigin = encodeURIComponent(window.location.origin);
-                  const { url } = await api<{ url: string }>(
-                    `/fbr/customer/qbo/auth-url?returnOrigin=${returnOrigin}&returnPath=${encodeURIComponent('/fbr/app/connections')}`,
-                  );
-                  window.location.href = url;
+                  await startQboOAuth('/fbr/customer/qbo/auth-url', '/fbr/app/connections');
                 } catch (e: any) {
                   setErr(e.message);
                   setBusy(false);
@@ -618,6 +618,7 @@ export function FbrCustomerInvoicesPage() {
     <>
       <div className="topbar">
         <div>
+          <div className="crumb">FBR workspace</div>
           <h1>Invoices</h1>
           <p>Validate then post to FBR DI — stores FBR invoice number, not PRA fiscal number.</p>
         </div>
