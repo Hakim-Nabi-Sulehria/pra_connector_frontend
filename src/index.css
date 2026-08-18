@@ -1793,19 +1793,9 @@ textarea {
   gap: 8px;
 }
 
-.pra-response-card {
-  margin-bottom: 12px;
-}
-
-.pra-response-card pre {
-  margin: 8px 0 0;
-  padding: 10px;
-  background: #f8fafc;
-  border: 1px solid var(--line);
-  border-radius: 8px;
-  font-size: 0.75rem;
-  overflow: auto;
-  max-height: 180px;
+.success-banner {
+  margin-bottom: 14px;
+  color: var(--ok);
 }
 
 .address-stack {

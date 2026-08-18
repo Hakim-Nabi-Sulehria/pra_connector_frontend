@@ -1520,9 +1520,9 @@ export function CustomerInvoicesPage() {
       const ok = results.filter((r) => r.status === 'fulfilled').length;
       const failed = results.length - ok;
       if (failed) {
-        setError(`${ok} posted, ${failed} failed. Check Activity for details.`);
+        setError(`${failed} invoice(s) could not be posted.`);
       } else {
-        setMsg(`${ok} invoice(s) posted to PRA successfully.`);
+        setMsg(`${ok} invoice(s) posted.`);
       }
       await load();
     } catch (e: any) {

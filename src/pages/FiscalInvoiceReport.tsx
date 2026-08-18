@@ -144,13 +144,13 @@ export function FiscalInvoiceReportPage() {
       });
       setFiscalInvoiceNo(String(result.fiscalInvoiceNo || ''));
       setMsg(
-        result.qboWriteVerified
-          ? 'Posted to PRA and fiscal number written back to QBO.'
-          : 'Posted to PRA. Check QBO custom field if write-back needs attention.',
+        result.fiscalInvoiceNo
+          ? `Invoice posted. Fiscal no: ${result.fiscalInvoiceNo}`
+          : 'Invoice posted successfully.',
       );
       await load();
     } catch (e: any) {
-      setError(e.message || 'Failed to post invoice to PRA');
+      setError(e.message || 'Unable to post invoice.');
     } finally {
       setPosting(false);
     }

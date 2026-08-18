@@ -388,12 +388,12 @@ export function InvoiceDetailPage() {
             (invoice.TotalAmt != null ? Number(invoice.TotalAmt) : undefined),
         }),
       });
-      setMsg('Invoice changes saved.');
+      setMsg('Changes saved.');
       setEditing(false);
       setDraft(null);
       await load();
     } catch (e: any) {
-      setError(e.message || 'Failed to save invoice changes');
+      setError(e.message || 'Unable to save changes.');
     } finally {
       setSaving(false);
     }
@@ -412,16 +412,15 @@ export function InvoiceDetailPage() {
           writeToQbo: true,
         }),
       });
-      const praMessage = result.praMessage || result.praResponse?.Response;
       setMsg(
-        result.qboWriteVerified
-          ? `Posted to PRA (${result.fiscalInvoiceNo}). ${praMessage || ''}`.trim()
-          : `Posted to PRA (${result.fiscalInvoiceNo}). ${praMessage || ''}`.trim(),
+        result.fiscalInvoiceNo
+          ? `Invoice posted. Fiscal no: ${result.fiscalInvoiceNo}`
+          : 'Invoice posted successfully.',
       );
       setConfirmPost(false);
       await load();
     } catch (e: any) {
-      setError(e.message || 'Failed to post invoice to PRA');
+      setError(e.message || 'Unable to post invoice.');
       setConfirmPost(false);
     } finally {
       setPosting(false);
@@ -445,9 +444,7 @@ export function InvoiceDetailPage() {
           </Link>
           <div>
             <h1>Invoice {text(invoice.DocNumber, String(invoice.Id))}</h1>
-            <p>
-              QuickBooks invoice detail · <StatusChip status={praStatus} />
-            </p>
+            <p><StatusChip status={praStatus} /></p>
           </div>
         </div>
         <div className="invoice-toolbar-actions">
@@ -490,16 +487,7 @@ export function InvoiceDetailPage() {
 
       {error && <div className="error-box">{error}</div>}
       {msg && (
-        <div className="card" style={{ marginBottom: 14, color: 'var(--ok)' }}>
-          {msg}
-        </div>
-      )}
-
-      {tracked?.praResponse && !editing && (
-        <div className="card pra-response-card">
-          <strong>Last PRA response</strong>
-          <pre>{JSON.stringify(tracked.praResponse, null, 2)}</pre>
-        </div>
+        <div className="card success-banner">{msg}</div>
       )}
 
       <div className="invoice-detail-grid">
@@ -834,9 +822,9 @@ export function InvoiceDetailPage() {
 
       <ConfirmModal
         open={confirmPost}
-        title="Post invoice to PRA?"
-        body={`This will submit invoice ${text(invoice.DocNumber, String(invoice.Id))} to the official PRA PostData API using your configured POS ID and token. Continue?`}
-        confirmLabel="Post to PRA"
+        title="Post to PRA?"
+        body={`Submit invoice ${text(invoice.DocNumber, String(invoice.Id))} to PRA?`}
+        confirmLabel="Post"
         busy={posting}
         onCancel={() => setConfirmPost(false)}
         onConfirm={postToPra}
