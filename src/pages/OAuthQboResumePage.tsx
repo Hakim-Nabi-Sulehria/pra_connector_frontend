@@ -2,7 +2,7 @@ import { useEffect, useState } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import { useAuth } from '../auth';
 import { getIntegrationMode, getToken, setSession } from '../lib/api';
-import { peekQboResume, safeClientReturnPath, takeQboResume } from '../lib/qbo-oauth';
+import { peekQboResume, safeClientReturnPath, setQboFlash, takeQboResume } from '../lib/qbo-oauth';
 
 export function OAuthQboResumePage() {
   const { refresh } = useAuth();
@@ -23,12 +23,13 @@ export function OAuthQboResumePage() {
       const me = await refresh();
       if (cancelled) return;
 
-      const qbo = search.get('qbo') || 'connected';
+      const qbo = search.get('qbo') || 'error';
       const message = search.get('message') || '';
       const mode = me?.integrationMode || resume?.mode || getIntegrationMode();
       const next = safeClientReturnPath(search.get('next') || resume?.returnPath, mode);
       const qs = new URLSearchParams({ qbo });
       if (message) qs.set('message', message);
+      setQboFlash(qbo, message);
 
       takeQboResume();
       if (me) {

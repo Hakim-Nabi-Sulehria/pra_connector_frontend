@@ -44,6 +44,28 @@ export function safeClientReturnPath(path?: string | null, mode?: IntegrationMod
   return mode === 'FBR' ? '/fbr/app/connections' : '/app/connections';
 }
 
+const FLASH_KEY = 'qbo_oauth_flash';
+
+export function setQboFlash(qbo: string, message?: string) {
+  sessionStorage.setItem(
+    FLASH_KEY,
+    JSON.stringify({ qbo, message: message || '', t: Date.now() }),
+  );
+}
+
+export function takeQboFlash(): { qbo: string; message: string } | null {
+  try {
+    const raw = sessionStorage.getItem(FLASH_KEY);
+    sessionStorage.removeItem(FLASH_KEY);
+    if (!raw) return null;
+    const parsed = JSON.parse(raw);
+    return { qbo: String(parsed.qbo || ''), message: String(parsed.message || '') };
+  } catch {
+    sessionStorage.removeItem(FLASH_KEY);
+    return null;
+  }
+}
+
 export async function startQboOAuth(authUrlPath: string, returnPath: string) {
   rememberQboResume(returnPath);
   const qs = new URLSearchParams({

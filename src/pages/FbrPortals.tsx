@@ -2,7 +2,7 @@ import { useEffect, useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { Activity, AlertTriangle, Building2, CheckCircle2, Plug } from 'lucide-react';
 import { api } from '../lib/api';
-import { startQboOAuth } from '../lib/qbo-oauth';
+import { startQboOAuth, takeQboFlash } from '../lib/qbo-oauth';
 import { useAuth } from '../auth';
 import { PageLoader } from '../components/PageLoader';
 import { QboConnectPrompt } from '../components/QboConnectPrompt';
@@ -375,12 +375,15 @@ export function FbrCustomerConnectionsPage() {
 
   useEffect(() => {
     const params = new URLSearchParams(window.location.search);
-    if (params.get('qbo') === 'connected') {
+    const flash = takeQboFlash();
+    const qbo = params.get('qbo') || flash?.qbo || '';
+    const message = params.get('message') || flash?.message || '';
+    if (qbo === 'connected') {
       setMsg('QuickBooks connected successfully.');
       window.history.replaceState({}, '', '/fbr/app/connections');
     }
-    if (params.get('qbo') === 'error') {
-      setErr(params.get('message') || 'QuickBooks connection failed');
+    if (qbo === 'error') {
+      setErr(message || 'QuickBooks connection failed');
       window.history.replaceState({}, '', '/fbr/app/connections');
     }
     load().catch((e) => setErr(e.message));
@@ -412,6 +415,11 @@ export function FbrCustomerConnectionsPage() {
           {data.qbo?.companyName && (
             <p style={{ marginTop: 0 }}>
               Company: <strong>{data.qbo.companyName}</strong>
+            </p>
+          )}
+          {data.qboEnvironment && (
+            <p style={{ color: 'var(--muted)', fontSize: 14, marginTop: 0 }}>
+              QBO environment: <strong>{data.qboEnvironment}</strong>
             </p>
           )}
           <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}>
@@ -448,6 +456,14 @@ export function FbrCustomerConnectionsPage() {
               </button>
             )}
           </div>
+          <p className="map-hint" style={{ marginTop: 12 }}>
+            Redirect URI must match Intuit Keys for the same tab as Render Client ID:{' '}
+            <code>
+              {data.qboRedirectUri ||
+                'https://pra-connector-backend.onrender.com/api/qbo/callback'}
+            </code>
+            . Development keys = sandbox. Production keys = production. Do not add the Vercel frontend URL.
+          </p>
         </div>
         <div className="card">
           <h3>FBR / PRAL DI</h3>

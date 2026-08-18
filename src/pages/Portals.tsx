@@ -1,7 +1,7 @@
 import { useEffect, useMemo, useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { api } from '../lib/api';
-import { startQboOAuth } from '../lib/qbo-oauth';
+import { startQboOAuth, takeQboFlash } from '../lib/qbo-oauth';
 import { useAuth } from '../auth';
 import { PageLoader } from '../components/PageLoader';
 import { QboConnectPrompt } from '../components/QboConnectPrompt';
@@ -656,12 +656,15 @@ export function CustomerConnectionsPage() {
 
   useEffect(() => {
     const params = new URLSearchParams(window.location.search);
-    if (params.get('qbo') === 'connected') {
+    const flash = takeQboFlash();
+    const qbo = params.get('qbo') || flash?.qbo || '';
+    const message = params.get('message') || flash?.message || '';
+    if (qbo === 'connected') {
       setMsg('QuickBooks connected successfully.');
       window.history.replaceState({}, '', '/app/connections');
     }
-    if (params.get('qbo') === 'error') {
-      setErr(params.get('message') || 'QuickBooks connection failed');
+    if (qbo === 'error') {
+      setErr(message || 'QuickBooks connection failed');
       window.history.replaceState({}, '', '/app/connections');
     }
     load().catch((e) => setErr(e.message));
