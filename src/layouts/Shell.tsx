@@ -102,7 +102,7 @@ export function CustomerLayout({ mode = 'PRA' }: { mode?: IntegrationMode }) {
   ];
 
   return (
-    <div className={`portal-shell dense-portal${mode === 'FBR' ? ' theme-di' : ''}`}>
+    <div className="portal-shell dense-portal">
       <aside className="sidebar">
         <div className="brand">
           <BrandMark />

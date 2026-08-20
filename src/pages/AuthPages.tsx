@@ -79,7 +79,6 @@ export function AdminLoginPage() {  const { login, user, portal, loading } = use
 
   return (
     <AuthShell
-      variant="admin"
       title="Super Admin access"
       hint="Sign in to manage companies, connections, and platform settings."
       visualBody="Oversee companies, QuickBooks connections, and fiscal integrations from one secure admin portal."
@@ -158,7 +157,6 @@ export function CustomerLoginPage() {
 
   return (
     <AuthShell
-      variant="pra"
       title="Sign in"
       hint="Access your workspace."
       visualBody="Connect QuickBooks Online and post compliant invoices to PRA or FBR."
@@ -295,7 +293,6 @@ export function RegisterPage() {
 
   return (
     <AuthShell
-      variant="pra"
       title="Create your workspace"
       hint="Register your organization and start fiscal invoicing."
       visualBody="Connect QuickBooks Online and post compliant invoices to PRA or FBR."

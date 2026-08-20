@@ -11,7 +11,6 @@ type AuthShellProps = {
   hint: string;
   children: ReactNode;
   visualBody: string;
-  variant?: 'pra' | 'fbr' | 'admin';
   footer?: ReactNode;
 };
 
@@ -26,11 +25,10 @@ export function AuthShell({
   hint,
   children,
   visualBody,
-  variant = 'pra',
   footer,
 }: AuthShellProps) {
   return (
-    <div className={`auth-screen${variant === 'fbr' ? ' auth-screen-fbr' : ''}${variant === 'admin' ? ' auth-screen-admin' : ''}`}>
+    <div className="auth-screen">
       <section className="auth-screen-visual" aria-hidden="false">
         <img src={tmrcLogo} alt="TMR Consulting" className="auth-screen-tmrc" />
 
