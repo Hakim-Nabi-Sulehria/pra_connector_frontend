@@ -46,7 +46,7 @@ export function AuthShell({
         <ul className="auth-screen-features">
           {features.map((item) => (
             <li key={item.label}>
-              <item.icon size={15} />
+              <item.icon size={12} />
               {item.label}
             </li>
           ))}

@@ -84,7 +84,7 @@ export function AdminLoginPage() {  const { login, user, portal, loading } = use
       hint="Sign in to manage companies, connections, and platform settings."
       visualBody="Oversee companies, QuickBooks connections, and fiscal integrations from one secure admin portal."
     >
-      <form className="premium-auth-form" onSubmit={onSubmit}>
+      <form className="premium-auth-form auth-screen-form" onSubmit={onSubmit}>
         {error && <div className="error-box">{error}</div>}
         <div className="field">
           <label>Email</label>
@@ -159,12 +159,12 @@ export function CustomerLoginPage() {
   return (
     <AuthShell
       variant={mode === 'FBR' ? 'fbr' : 'pra'}
-      title="Welcome back"
-      hint="Sign in to your workspace and continue fiscal invoicing."
+      title="Sign in"
+      hint="Access your workspace."
       visualBody={
         mode === 'FBR'
-          ? 'Connect QuickBooks Online and post compliant invoices to FBR in real time.'
-          : 'Connect QuickBooks Online and post compliant invoices to PRA in real time.'
+          ? 'Connect QuickBooks Online and post compliant invoices to FBR.'
+          : 'Connect QuickBooks Online and post compliant invoices to PRA.'
       }
     >
       <IntegrationModeLoginTabs
@@ -175,7 +175,7 @@ export function CustomerLoginPage() {
           setPassword('');
         }}
       />
-      <form className="premium-auth-form" onSubmit={onSubmit}>
+      <form className="premium-auth-form auth-screen-form" onSubmit={onSubmit}>
         {searchParams.get('qbo') === 'connected' && (
           <div className="card flash-ok" style={{ marginBottom: 14 }}>
             QuickBooks was approved. Sign in to open your workspace.
@@ -309,12 +309,12 @@ export function RegisterPage() {
       hint="Register your organization and start fiscal invoicing."
       visualBody={
         mode === 'FBR'
-          ? 'Connect QuickBooks Online and post compliant invoices to FBR in real time.'
-          : 'Connect QuickBooks Online and post compliant invoices to PRA in real time.'
+          ? 'Connect QuickBooks Online and post compliant invoices to FBR.'
+          : 'Connect QuickBooks Online and post compliant invoices to PRA.'
       }
     >
       <IntegrationModeLoginTabs mode={mode} onChange={setMode} />
-      <form className="premium-auth-form" onSubmit={onSubmit}>
+      <form className="premium-auth-form auth-screen-form" onSubmit={onSubmit}>
         {error && <div className="error-box">{error}</div>}
         {(
           [
