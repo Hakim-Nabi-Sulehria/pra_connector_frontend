@@ -4,9 +4,9 @@ import { useAuth } from '../auth';
 import { api, type IntegrationMode } from '../lib/api';
 import { IntegrationModeLoginTabs } from '../components/IntegrationModeTabs';
 import { AuthShell } from '../components/AuthShell';
-import tmrcLogo from '../assets/branding/tmrc-logo.png';
-import tmracLogo from '../assets/branding/tmrac-logo.png';
-import tmrDiLogo from '../assets/branding/tmr-di-logo.png';
+import tmrcLogo from '../assets/branding/tmrc-latest-logo.png';
+import tmracLogo from '../assets/branding/TMRAC_latest_logo.jpeg';
+import tmrDiLogo from '../assets/branding/tmr-di-software-logo.png';
 
 export function LandingPage() {
   return (
@@ -82,7 +82,6 @@ export function AdminLoginPage() {  const { login, user, portal, loading } = use
       variant="admin"
       title="Super Admin access"
       hint="Sign in to manage companies, connections, and platform settings."
-      visualTitle="Platform command center"
       visualBody="Oversee companies, QuickBooks connections, and fiscal integrations from one secure admin portal."
     >
       <form className="premium-auth-form" onSubmit={onSubmit}>
@@ -162,7 +161,6 @@ export function CustomerLoginPage() {
       variant={mode === 'FBR' ? 'fbr' : 'pra'}
       title="Welcome back"
       hint="Sign in to your workspace and continue fiscal invoicing."
-      visualTitle="Smart invoicing, simplified business"
       visualBody={
         mode === 'FBR'
           ? 'Connect QuickBooks Online and post compliant invoices to FBR in real time.'
@@ -309,11 +307,10 @@ export function RegisterPage() {
       variant={mode === 'FBR' ? 'fbr' : 'pra'}
       title="Create your workspace"
       hint="Register your organization and start fiscal invoicing."
-      visualTitle="Launch in minutes"
       visualBody={
         mode === 'FBR'
-          ? 'Set up your company workspace for FBR digital invoicing.'
-          : 'Set up your company workspace for PRA fiscal invoicing.'
+          ? 'Connect QuickBooks Online and post compliant invoices to FBR in real time.'
+          : 'Connect QuickBooks Online and post compliant invoices to PRA in real time.'
       }
     >
       <IntegrationModeLoginTabs mode={mode} onChange={setMode} />
@@ -395,8 +392,7 @@ export function ResetPasswordRequestPage() {
     <AuthShell
       title="Reset password"
       hint="Enter your email to receive an OTP."
-      visualTitle="Reset password"
-      visualBody="We will send an OTP to verify your account."
+      visualBody="Connect QuickBooks Online and post compliant invoices in real time."
     >
       <form onSubmit={sendOtp}>
         {error && <div className="error-box">{error}</div>}
@@ -478,8 +474,7 @@ export function ResetPasswordOtpPage() {
     <AuthShell
       title="Enter OTP"
       hint="Enter the OTP sent to your email."
-      visualTitle="Verify OTP"
-      visualBody="Confirm the OTP to continue."
+      visualBody="Connect QuickBooks Online and post compliant invoices in real time."
     >
       <form onSubmit={verify}>
         {error && <div className="error-box">{error}</div>}
@@ -558,8 +553,7 @@ export function ResetPasswordUpdatePage() {
     <AuthShell
       title="Update password"
       hint="Set a new password for your workspace account."
-      visualTitle="Password update"
-      visualBody="Choose a strong password and confirm it."
+      visualBody="Connect QuickBooks Online and post compliant invoices in real time."
     >
       <form onSubmit={update}>
         {error && <div className="error-box">{error}</div>}

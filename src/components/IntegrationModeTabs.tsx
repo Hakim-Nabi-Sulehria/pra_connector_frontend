@@ -61,7 +61,7 @@ export function IntegrationModeLoginTabs({
   onChange: (m: IntegrationMode) => void;
 }) {
   return (
-    <div className="premium-auth-mode-tabs">
+    <div className="premium-auth-mode-tabs auth-screen-mode-tabs">
       <button
         type="button"
         className={mode === 'PRA' ? 'active' : ''}
