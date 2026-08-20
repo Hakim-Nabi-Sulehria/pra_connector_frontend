@@ -676,18 +676,8 @@ export function CustomerConnectionsPage() {
             </div>
             <div className="step-item">
               <span>Environment</span>
-              <strong className="step-value">{data.pra?.environment || 'sandbox'}</strong>
-            </div>
-            <div className="step-item step-item-stack">
-              <span>API URL</span>
-              <strong className="step-value mono break-all">
-                {data.pra?.apiUrl || '—'}
-              </strong>
-            </div>
-            <div className="step-item">
-              <span>Token</span>
               <strong className="step-value">
-                {data.pra?.hasToken ? 'Configured by admin' : 'Not configured'}
+                {(data.pra?.environment || 'sandbox').toUpperCase()}
               </strong>
             </div>
           </div>

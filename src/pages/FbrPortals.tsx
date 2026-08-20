@@ -284,10 +284,6 @@ export function FbrCustomerConnectionsPage() {
               <span>Environment</span>
               <strong>{(data.fbr?.environment || 'sandbox').toUpperCase()}</strong>
             </div>
-            <div className="step-item">
-              <span>Token</span>
-              <strong>{data.fbr?.hasToken ? 'Configured by admin' : 'Not configured'}</strong>
-            </div>
           </div>
         </div>
       </div>
