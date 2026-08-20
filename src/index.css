@@ -482,7 +482,7 @@ body:has(.auth-screen) {
   max-height: 100dvh;
   overflow: hidden;
   display: grid;
-  grid-template-columns: minmax(0, 1fr) minmax(320px, 420px);
+  grid-template-columns: 1fr 1fr;
   background: #eef3f8;
 }
 
