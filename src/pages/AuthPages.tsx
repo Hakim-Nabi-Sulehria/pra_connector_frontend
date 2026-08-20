@@ -158,14 +158,10 @@ export function CustomerLoginPage() {
 
   return (
     <AuthShell
-      variant={mode === 'FBR' ? 'fbr' : 'pra'}
+      variant="pra"
       title="Sign in"
       hint="Access your workspace."
-      visualBody={
-        mode === 'FBR'
-          ? 'Connect QuickBooks Online and post compliant invoices to FBR.'
-          : 'Connect QuickBooks Online and post compliant invoices to PRA.'
-      }
+      visualBody="Connect QuickBooks Online and post compliant invoices to PRA or FBR."
     >
       <IntegrationModeLoginTabs
         mode={mode}
@@ -299,14 +295,10 @@ export function RegisterPage() {
 
   return (
     <AuthShell
-      variant={mode === 'FBR' ? 'fbr' : 'pra'}
+      variant="pra"
       title="Create your workspace"
       hint="Register your organization and start fiscal invoicing."
-      visualBody={
-        mode === 'FBR'
-          ? 'Connect QuickBooks Online and post compliant invoices to FBR.'
-          : 'Connect QuickBooks Online and post compliant invoices to PRA.'
-      }
+      visualBody="Connect QuickBooks Online and post compliant invoices to PRA or FBR."
     >
       <IntegrationModeLoginTabs mode={mode} onChange={setMode} />
       <form className="premium-auth-form auth-screen-form" onSubmit={onSubmit}>

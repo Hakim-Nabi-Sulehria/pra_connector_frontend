@@ -698,7 +698,7 @@ body:has(.auth-screen) {
   min-width: 78px;
   padding: 10px 8px;
   border-radius: 10px;
-  background: #0f4c5c;
+  background: linear-gradient(135deg, #0a5f63 0%, #0f766e 100%);
   color: #fff;
   font-family: ui-monospace, monospace;
   font-size: 0.82rem;
@@ -712,13 +712,23 @@ body:has(.auth-screen) {
 }
 
 .auth-screen-submit,
-.premium-auth-submit {
+.premium-auth-submit,
+.auth-screen-form .btn-primary.premium-auth-submit {
   width: 100%;
   margin-top: 2px;
   padding: 11px 14px;
   font-size: 0.88rem;
   border-radius: 10px;
-  box-shadow: 0 10px 22px rgba(15, 118, 110, 0.2);
+  border: none;
+  color: #fff;
+  background: linear-gradient(135deg, #0a5f63 0%, #0f766e 45%, #14b8a6 100%);
+  box-shadow: 0 10px 22px rgba(15, 118, 110, 0.22);
+}
+
+.auth-screen-submit:hover:not(:disabled),
+.premium-auth-submit:hover:not(:disabled),
+.auth-screen-form .btn-primary.premium-auth-submit:hover:not(:disabled) {
+  background: linear-gradient(135deg, #0c6b6f 0%, #12837a 45%, #2dd4bf 100%);
 }
 
 .auth-screen-secondary,
@@ -759,19 +769,9 @@ body:has(.auth-screen) {
 
 .auth-screen-mode-tabs button.active,
 .premium-auth-mode-tabs button.active {
-  background: #fff;
-  color: var(--ink);
-  box-shadow: 0 4px 12px rgba(7, 27, 42, 0.08);
-}
-
-.auth-screen-fbr .auth-screen-visual {
-  background: linear-gradient(160deg, #004d50 0%, #007a7e 52%, #008489 100%);
-}
-
-.auth-screen-fbr .auth-screen-submit,
-.auth-screen-fbr .premium-auth-submit {
-  background: #008489;
-  box-shadow: 0 14px 28px rgba(0, 132, 137, 0.24);
+  background: linear-gradient(135deg, #0a5f63 0%, #0f766e 45%, #14b8a6 100%);
+  color: #fff;
+  box-shadow: 0 6px 16px rgba(15, 118, 110, 0.28);
 }
 
 .auth-screen-admin .auth-screen-visual {
