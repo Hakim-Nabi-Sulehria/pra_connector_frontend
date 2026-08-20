@@ -5,6 +5,7 @@ import { startQboOAuth, takeQboFlash } from '../lib/qbo-oauth';
 import { useAuth } from '../auth';
 import { PageLoader } from '../components/PageLoader';
 import { QboConnectPrompt } from '../components/QboConnectPrompt';
+import { CustomerDashboardShell } from '../components/CustomerDashboardWidgets';
 
 function StatusBadge({ status }: { status?: string }) {
   const s = (status || 'DISCONNECTED').toUpperCase();
@@ -371,7 +372,6 @@ export function CustomerDashboardPage() {
     api('/customer/dashboard').then(setData);
   }, []);
   if (!data) return <PageLoader label="Loading workspace…" />;
-  const pct = Math.round((data.onboarding.completed / data.onboarding.total) * 100);
   const qboConnected = data.org?.qbo?.status === 'CONNECTED';
 
   if (!qboConnected) {
@@ -392,158 +392,13 @@ export function CustomerDashboardPage() {
   }
 
   return (
-    <>
-      <div className="topbar">
-        <div>
-          <h1>{data.org?.name}</h1>
-        </div>
-        <Link className="btn btn-primary" to="/app/connections">
-          {qboConnected ? 'Manage connections' : 'Connect to QuickBooks online'}
-        </Link>
-      </div>
-      <div className="grid kpi" style={{ marginBottom: 16 }}>
-        {[
-          ['Posted', data.kpis.posted],
-          ['Pending', data.kpis.pending],
-          ['Failed', data.kpis.failed],
-          ['Total tracked', data.kpis.total],
-        ].map(([label, value]) => (
-          <div className="card kpi-card" key={label as string}>
-            <div className="kpi-label">{label}</div>
-            <div className="kpi-value">{value}</div>
-          </div>
-        ))}
-      </div>
-
-      {qboConnected && (
-        <div className="card" style={{ marginBottom: 16 }}>
-          <h3 style={{ marginTop: 0 }}>Invoice traffic overview</h3>
-          {(() => {
-            const posted = Number(data.kpis.posted || 0);
-            const pending = Number(data.kpis.pending || 0);
-            const failed = Number(data.kpis.failed || 0);
-            const max = Math.max(posted, pending, failed, 1);
-            const successRate =
-              posted + failed === 0
-                ? 100
-                : Math.round((posted / (posted + failed)) * 100);
-            const bars = [
-              { label: 'Posted', value: posted, color: 'var(--ok)' },
-              { label: 'Pending', value: pending, color: 'var(--warn)' },
-              { label: 'Failed', value: failed, color: 'var(--danger)' },
-            ];
-            return (
-              <>
-                <div style={{ display: 'flex', gap: 12, alignItems: 'flex-end' }}>
-                  {bars.map((b) => (
-                    <div key={b.label} style={{ flex: 1, minWidth: 120 }}>
-                      <div
-                        style={{
-                          height: 130,
-                          borderRadius: 14,
-                          border: '1px solid var(--line)',
-                          display: 'flex',
-                          alignItems: 'flex-end',
-                          padding: 10,
-                          background: 'rgba(255,255,255,.65)',
-                        }}
-                      >
-                        <div
-                          style={{
-                            width: '100%',
-                            height: `${Math.round((b.value / max) * 100)}%`,
-                            background: b.color,
-                            borderRadius: 10,
-                            transition: 'height .2s ease',
-                          }}
-                        />
-                      </div>
-                      <div style={{ marginTop: 8, color: 'var(--muted)', fontSize: 13 }}>
-                        {b.label}: <strong style={{ color: 'var(--ink-soft)' }}>{b.value}</strong>
-                      </div>
-                    </div>
-                  ))}
-                </div>
-                <div style={{ marginTop: 10, color: 'var(--muted)' }}>
-                  Success rate (Posted vs Failed): <strong style={{ color: 'var(--ink-soft)' }}>{successRate}%</strong>
-                </div>
-              </>
-            );
-          })()}
-        </div>
-      )}
-      <div className="grid two">
-        <div className="card">
-          <h3>Onboarding runway</h3>
-          <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 8 }}>
-            <span style={{ color: 'var(--muted)' }}>
-              {data.onboarding.completed}/{data.onboarding.total} complete
-            </span>
-            <strong>{pct}%</strong>
-          </div>
-          <div className="progress" style={{ marginBottom: 14 }}>
-            <span style={{ width: `${pct}%` }} />
-          </div>
-          <div className="step-list">
-            {data.onboarding.steps.map((s: any) => (
-              <div className="step-item" key={s.key}>
-                <span>{s.label}</span>
-                <StatusBadge status={s.done ? 'CONNECTED' : 'PENDING'} />
-              </div>
-            ))}
-          </div>
-        </div>
-        <div className="card">
-          <h3>Connection health</h3>
-          <div className="step-list">
-            <div className="step-item">
-              <span>QuickBooks Online</span>
-              <StatusBadge status={data.org?.qbo?.status} />
-            </div>
-            <div className="step-item">
-              <span>PRA e-IMS</span>
-              <StatusBadge status={data.org?.pra?.status} />
-            </div>
-            <div className="step-item">
-              <span>Branches configured</span>
-              <strong>{data.org?.branches?.length || 0}</strong>
-            </div>
-          </div>
-        </div>
-      </div>
-      <div className="card" style={{ marginTop: 16 }}>
-        <h3>Recent invoices</h3>
-        <table className="table">
-          <thead>
-            <tr>
-              <th>USIN</th>
-              <th>Customer</th>
-              <th>Amount</th>
-              <th>Status</th>
-            </tr>
-          </thead>
-          <tbody>
-            {data.recentInvoices?.map((inv: any) => (
-              <tr key={inv.id}>
-                <td>{inv.usin || inv.qboInvoiceId}</td>
-                <td>{inv.customerName || '—'}</td>
-                <td>{inv.totalAmount ?? '—'}</td>
-                <td>
-                  <StatusBadge status={inv.status} />
-                </td>
-              </tr>
-            ))}
-            {!data.recentInvoices?.length && (
-              <tr>
-                <td colSpan={4} style={{ color: 'var(--muted)' }}>
-                  No invoices yet. Seed a demo from the Invoices page or connect QBO.
-                </td>
-              </tr>
-            )}
-          </tbody>
-        </table>
-      </div>
-    </>
+    <CustomerDashboardShell
+      title={data.org?.name}
+      connectionsPath="/app/connections"
+      mode="PRA"
+      data={data}
+      emptyHint="No invoices yet. Open Invoices to sync from QuickBooks."
+    />
   );
 }
 

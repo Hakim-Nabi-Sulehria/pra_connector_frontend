@@ -1,10 +1,10 @@
 import { useEffect, useState } from 'react';
-import { Link } from 'react-router-dom';
 import { api } from '../lib/api';
 import { startQboOAuth, takeQboFlash } from '../lib/qbo-oauth';
 import { useAuth } from '../auth';
 import { PageLoader } from '../components/PageLoader';
 import { QboConnectPrompt } from '../components/QboConnectPrompt';
+import { CustomerDashboardShell } from '../components/CustomerDashboardWidgets';
 
 function StatusBadge({ status }: { status?: string }) {
   const s = (status || 'DISCONNECTED').toUpperCase();
@@ -31,7 +31,6 @@ export function FbrCustomerDashboardPage() {
   }, [refresh]);
 
   if (!data) return <PageLoader label="Loading FBR workspace…" />;
-  const pct = Math.round((data.onboarding.completed / data.onboarding.total) * 100);
   const qboConnected = data.org?.qbo?.status === 'CONNECTED';
 
   if (!qboConnected) {
@@ -53,103 +52,14 @@ export function FbrCustomerDashboardPage() {
   }
 
   return (
-    <>
-      <div className="topbar">
-        <div>
-          <div className="crumb">FBR workspace</div>
-          <h1>{data.org?.name}</h1>
-        </div>
-        <Link className="btn btn-primary" to="/fbr/app/connections">
-          Manage connections
-        </Link>
-      </div>
-      <div className="grid kpi" style={{ marginBottom: 16 }}>
-        {[
-          ['Posted', data.kpis.posted],
-          ['Pending', data.kpis.pending],
-          ['Failed', data.kpis.failed],
-          ['Total tracked', data.kpis.total],
-        ].map(([label, value]) => (
-          <div className="card kpi-card" key={label as string}>
-            <div className="kpi-label">{label}</div>
-            <div className="kpi-value">{value}</div>
-          </div>
-        ))}
-      </div>
-      <div className="grid two">
-        <div className="card">
-          <h3>Onboarding runway</h3>
-          <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 8 }}>
-            <span style={{ color: 'var(--muted)' }}>
-              {data.onboarding.completed}/{data.onboarding.total} complete
-            </span>
-            <strong>{pct}%</strong>
-          </div>
-          <div className="progress" style={{ marginBottom: 14 }}>
-            <span style={{ width: `${pct}%` }} />
-          </div>
-          <div className="step-list">
-            {data.onboarding.steps.map((s: any) => (
-              <div className="step-item" key={s.key}>
-                <span>{s.label}</span>
-                <StatusBadge status={s.done ? 'CONNECTED' : 'PENDING'} />
-              </div>
-            ))}
-          </div>
-        </div>
-        <div className="card">
-          <h3>Connection health</h3>
-          <div className="step-list">
-            <div className="step-item">
-              <span>QuickBooks Online</span>
-              <StatusBadge status={data.org?.qbo?.status} />
-            </div>
-            <div className="step-item">
-              <span>FBR DI</span>
-              <StatusBadge status={data.org?.fbr?.status} />
-            </div>
-            <div className="step-item">
-              <span>Seller NTN</span>
-              <strong>{data.org?.fbr?.sellerNTNCNIC || '—'}</strong>
-            </div>
-          </div>
-        </div>
-      </div>
-      <div className="card" style={{ marginTop: 16 }}>
-        <h3>Recent FBR invoices</h3>
-        <table className="table">
-          <thead>
-            <tr>
-              <th>USIN</th>
-              <th>Customer</th>
-              <th>Amount</th>
-              <th>FBR invoice no.</th>
-              <th>Status</th>
-            </tr>
-          </thead>
-          <tbody>
-            {data.recentInvoices?.map((inv: any) => (
-              <tr key={inv.id}>
-                <td>{inv.usin || inv.qboInvoiceId}</td>
-                <td>{inv.customerName || '—'}</td>
-                <td>{inv.totalAmount ?? '—'}</td>
-                <td>{inv.fbrInvoiceNo || '—'}</td>
-                <td>
-                  <StatusBadge status={inv.status} />
-                </td>
-              </tr>
-            ))}
-            {!data.recentInvoices?.length && (
-              <tr>
-                <td colSpan={5} style={{ color: 'var(--muted)' }}>
-                  No FBR invoices yet. Connect QBO, map fields, then validate/post.
-                </td>
-              </tr>
-            )}
-          </tbody>
-        </table>
-      </div>
-    </>
+    <CustomerDashboardShell
+      title={data.org?.name}
+      crumb="FBR workspace"
+      connectionsPath="/fbr/app/connections"
+      mode="FBR"
+      data={data}
+      emptyHint="No FBR invoices yet. Open Invoices to sync from QuickBooks."
+    />
   );
 }
 

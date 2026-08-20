@@ -1315,6 +1315,244 @@ textarea {
   gap: 12px;
 }
 
+.customer-dash-layout {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 320px;
+  gap: 16px;
+  align-items: start;
+}
+
+.customer-dash-main {
+  display: grid;
+  gap: 16px;
+  min-width: 0;
+}
+
+.customer-kpi-row {
+  margin-bottom: 0;
+}
+
+.customer-kpi-tile .kpi-value {
+  font-size: 1.65rem;
+}
+
+.customer-panel-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  margin-bottom: 14px;
+}
+
+.customer-panel-head h3 {
+  margin: 0;
+}
+
+.customer-panel-meta {
+  color: var(--muted);
+  font-size: 0.82rem;
+  font-weight: 600;
+}
+
+.customer-invoice-grid {
+  display: grid;
+  grid-template-columns: 1.1fr 0.9fr;
+  gap: 18px;
+  align-items: center;
+}
+
+.customer-donut-wrap {
+  gap: 16px;
+}
+
+.customer-donut {
+  width: 138px;
+  height: 138px;
+}
+
+.customer-donut .dash-donut-hole {
+  width: 84px;
+  height: 84px;
+}
+
+.customer-bars {
+  min-height: 180px;
+}
+
+.connections-mini {
+  position: sticky;
+  top: 16px;
+  display: grid;
+  gap: 12px;
+}
+
+.connections-mini-card {
+  padding: 16px;
+}
+
+.connections-mini-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  margin-bottom: 14px;
+}
+
+.connections-mini-head > div {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.connections-mini-head h3 {
+  margin: 0;
+  font-size: 0.98rem;
+}
+
+.btn-mini {
+  padding: 6px 10px;
+  font-size: 0.78rem;
+}
+
+.connections-mini-block {
+  display: grid;
+  gap: 10px;
+  margin-bottom: 14px;
+}
+
+.connections-mini-service {
+  display: grid;
+  grid-template-columns: auto 1fr auto;
+  gap: 10px;
+  align-items: center;
+  padding: 10px;
+  border: 1px solid var(--line);
+  border-radius: 12px;
+  background: rgba(255, 255, 255, 0.55);
+}
+
+.connections-mini-icon {
+  width: 30px;
+  height: 30px;
+  border-radius: 9px;
+  display: grid;
+  place-items: center;
+  background: rgba(15, 118, 110, 0.1);
+  color: var(--teal);
+}
+
+.connections-mini-copy {
+  display: grid;
+  gap: 2px;
+  min-width: 0;
+}
+
+.connections-mini-copy span {
+  font-size: 0.84rem;
+  font-weight: 600;
+}
+
+.connections-mini-copy em {
+  font-style: normal;
+  color: var(--muted);
+  font-size: 0.74rem;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.connections-mini-facts {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 10px;
+  margin-bottom: 14px;
+}
+
+.connections-mini-facts > div {
+  padding: 10px;
+  border-radius: 10px;
+  border: 1px solid var(--line);
+  background: rgba(255, 255, 255, 0.45);
+  display: grid;
+  gap: 4px;
+}
+
+.connections-mini-facts span {
+  color: var(--muted);
+  font-size: 0.72rem;
+}
+
+.connections-mini-facts strong {
+  font-size: 0.86rem;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.connections-mini-setup {
+  padding-top: 12px;
+  border-top: 1px solid var(--line);
+}
+
+.connections-mini-setup-head {
+  display: flex;
+  justify-content: space-between;
+  gap: 8px;
+  font-size: 0.82rem;
+  margin-bottom: 8px;
+}
+
+.connections-mini-progress {
+  margin-bottom: 10px;
+}
+
+.connections-mini-pending {
+  margin: 0;
+  padding-left: 18px;
+  color: var(--muted);
+  font-size: 0.78rem;
+  display: grid;
+  gap: 4px;
+}
+
+.connections-mini-done {
+  margin: 0;
+  color: var(--ok);
+  font-size: 0.78rem;
+  font-weight: 600;
+}
+
+.connections-mini-org {
+  display: grid;
+  grid-template-columns: auto 1fr;
+  gap: 10px;
+  align-items: center;
+}
+
+.connections-mini-icon-wide {
+  align-self: start;
+}
+
+.connections-mini-org-label {
+  display: block;
+  color: var(--muted);
+  font-size: 0.72rem;
+  margin-bottom: 2px;
+}
+
+.connections-mini-org strong {
+  display: block;
+  font-size: 0.92rem;
+}
+
+.connections-mini-org em {
+  display: block;
+  margin-top: 2px;
+  color: var(--muted);
+  font-style: normal;
+  font-size: 0.74rem;
+}
+
 .qbo-connect-card {
   max-width: 640px;
   padding: 28px;
@@ -2518,6 +2756,8 @@ textarea {
   .grid.two-eq,
   .grid.three,
   .dash-hero-grid,
+  .customer-dash-layout,
+  .customer-invoice-grid,
   .form-grid,
   .identity-card,
   .auth-page {
