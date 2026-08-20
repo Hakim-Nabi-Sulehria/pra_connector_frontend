@@ -17,6 +17,7 @@ import type { IntegrationMode } from '../lib/api';
 const praAdminLinks = [
   { to: '/admin', label: 'Dashboard', icon: LayoutDashboard, end: true },
   { to: '/admin/companies', label: 'Companies', icon: Building2 },
+  { to: '/admin/audit-logs', label: 'Audit logs', icon: ScrollText },
   {
     to: '/admin/qbo-config',
     label: 'QuickBooks Online Configuration',
@@ -27,6 +28,7 @@ const praAdminLinks = [
 const fbrAdminLinks = [
   { to: '/admin/fbr', label: 'Dashboard', icon: LayoutDashboard, end: true },
   { to: '/admin/fbr/companies', label: 'Companies', icon: Building2 },
+  { to: '/admin/fbr/audit-logs', label: 'Audit logs', icon: ScrollText },
   {
     to: '/admin/fbr/qbo-config',
     label: 'QuickBooks Online Configuration',

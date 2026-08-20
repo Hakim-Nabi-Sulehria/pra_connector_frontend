@@ -12,7 +12,6 @@ import {
   ResetPasswordUpdatePage,
 } from './pages/AuthPages';
 import {
-  AdminOverviewPage,
   CustomerBranchesPage,
   CustomerConnectionsPage,
   CustomerDashboardPage,
@@ -20,6 +19,8 @@ import {
   CustomerLogsPage,
   CustomerMappingsPage,
 } from './pages/Portals';
+import { AdminOverviewPage, FbrAdminOverviewPage } from './pages/AdminDashboard';
+import { AdminAuditLogsPage } from './pages/AdminAuditLogs';
 import {
   AdminCompaniesListPage,
   AdminCompanyCreatePage,
@@ -32,7 +33,6 @@ import {
   AdminFbrCompanyDetailPage,
 } from './pages/AdminFbrCompanies';
 import {
-  FbrAdminOverviewPage,
   FbrCustomerConnectionsPage,
   FbrCustomerDashboardPage,
   FbrCustomerInvoicesPage,
@@ -92,6 +92,7 @@ export default function App() {
         <Route element={<Guard portal="admin" mode="PRA" />}>
           <Route path="/admin" element={<AdminLayout mode="PRA" />}>
             <Route index element={<AdminOverviewPage />} />
+            <Route path="audit-logs" element={<AdminAuditLogsPage mode="PRA" />} />
             <Route path="companies" element={<AdminCompaniesListPage />} />
             <Route path="companies/new" element={<AdminCompanyCreatePage />} />
             <Route path="companies/:id" element={<AdminCompanyDetailPage />} />
@@ -103,6 +104,7 @@ export default function App() {
         <Route element={<Guard portal="admin" mode="FBR" />}>
           <Route path="/admin/fbr" element={<AdminLayout mode="FBR" />}>
             <Route index element={<FbrAdminOverviewPage />} />
+            <Route path="audit-logs" element={<AdminAuditLogsPage mode="FBR" />} />
             <Route path="companies" element={<AdminFbrCompaniesListPage />} />
             <Route path="companies/new" element={<AdminFbrCompanyCreatePage />} />
             <Route path="companies/:id" element={<AdminFbrCompanyDetailPage />} />
