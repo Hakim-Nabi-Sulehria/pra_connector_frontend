@@ -244,11 +244,6 @@ export function CustomerLoginPage() {
         >
           Reset password
         </button>
-        <p className="premium-auth-switch">
-          New organization? <Link to="/register">Create account</Link>
-          {' · '}
-          <Link to="/admin/login">Super Admin</Link>
-        </p>
       </form>
     </AuthShell>
   );

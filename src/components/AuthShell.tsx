@@ -2,7 +2,7 @@ import type { ReactNode } from 'react';
 import { Link } from 'react-router-dom';
 import { Lock, ShieldCheck, Zap } from 'lucide-react';
 import tmrcLogo from '../assets/branding/tmrc-latest-logo.png';
-import tmracLogo from '../assets/branding/TMRAC_latest_logo.jpeg';
+import tmracLogo from '../assets/branding/tmrac-logo.png';
 import authHero from '../assets/branding/auth-hero-illustration.png';
 import invoiceHero from '../assets/branding/dummyinvoicepic.png';
 
@@ -34,23 +34,23 @@ export function AuthShell({
       <section className="auth-screen-visual" aria-hidden="false">
         <img src={tmrcLogo} alt="TMR Consulting" className="auth-screen-tmrc" />
 
-        <div className="auth-screen-copy">
-          <p>{visualBody}</p>
-        </div>
+        <div className="auth-screen-stack">
+          <p className="auth-screen-copy">{visualBody}</p>
 
-        <div className="auth-screen-art">
-          <img src={authHero} alt="" className="auth-screen-hero" />
-          <img src={invoiceHero} alt="" className="auth-screen-invoice" />
-        </div>
+          <div className="auth-screen-art">
+            <img src={authHero} alt="" className="auth-screen-hero" />
+            <img src={invoiceHero} alt="" className="auth-screen-invoice" />
+          </div>
 
-        <ul className="auth-screen-features">
-          {features.map((item) => (
-            <li key={item.label}>
-              <item.icon size={12} />
-              {item.label}
-            </li>
-          ))}
-        </ul>
+          <ul className="auth-screen-features">
+            {features.map((item) => (
+              <li key={item.label}>
+                <item.icon size={12} />
+                {item.label}
+              </li>
+            ))}
+          </ul>
+        </div>
 
         <img src={tmracLogo} alt="TMRAC" className="auth-screen-tmrac" />
       </section>

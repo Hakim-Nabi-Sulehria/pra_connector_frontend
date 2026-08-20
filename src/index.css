@@ -488,11 +488,9 @@ body:has(.auth-screen) {
 
 .auth-screen-visual {
   position: relative;
-  display: grid;
-  grid-template-rows: auto minmax(0, 1fr) auto;
-  align-content: center;
-  gap: 10px;
-  padding: 16px 24px 54px;
+  display: flex;
+  flex-direction: column;
+  padding: 16px 24px;
   color: #fff;
   background: linear-gradient(160deg, #0a5f63 0%, #0f766e 52%, #115e59 100%);
   overflow: hidden;
@@ -503,54 +501,56 @@ body:has(.auth-screen) {
   position: absolute;
   top: 14px;
   left: 18px;
-  height: 34px;
+  height: 38px;
   width: auto;
+  max-width: min(240px, 46%);
   object-fit: contain;
-  background: rgba(255, 255, 255, 0.96);
-  border-radius: 8px;
-  padding: 4px 8px;
   z-index: 2;
+  mix-blend-mode: screen;
 }
 
 .auth-screen-tmrac {
   position: absolute;
   left: 18px;
   bottom: 14px;
-  height: 30px;
+  height: 34px;
   width: auto;
-  max-width: min(220px, 62%);
+  max-width: min(240px, 46%);
   object-fit: contain;
-  background: rgba(255, 255, 255, 0.96);
-  border-radius: 8px;
-  padding: 4px 8px;
   z-index: 2;
 }
 
-.auth-screen-copy {
-  margin: 42px 0 0;
-  max-width: 28rem;
+.auth-screen-stack {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 14px;
+  padding: 52px 12px 52px;
+  min-height: 0;
 }
 
-.auth-screen-copy p {
+.auth-screen-copy {
   margin: 0;
+  max-width: 22rem;
+  text-align: center;
   font-size: 0.92rem;
   line-height: 1.45;
-  color: rgba(255, 255, 255, 0.9);
+  color: rgba(255, 255, 255, 0.92);
 }
 
 .auth-screen-art {
   position: relative;
-  width: min(340px, 92%);
-  max-height: min(34vh, 260px);
-  margin: 0 auto;
-  align-self: center;
+  width: min(340px, 88%);
+  max-height: min(32vh, 240px);
 }
 
 .auth-screen-hero {
   display: block;
   width: 100%;
   height: 100%;
-  max-height: min(34vh, 260px);
+  max-height: min(32vh, 240px);
   object-fit: contain;
 }
 
@@ -571,7 +571,9 @@ body:has(.auth-screen) {
   padding: 0;
   display: flex;
   flex-wrap: wrap;
+  justify-content: center;
   gap: 6px;
+  max-width: 26rem;
 }
 
 .auth-screen-features li {
@@ -3119,29 +3121,25 @@ body:has(.auth-screen) {
   }
 
   .auth-screen-visual {
-    padding: 24px 20px 88px;
+    padding: 20px 18px;
+  }
+
+  .auth-screen-stack {
+    padding: 12px 0 20px;
   }
 
   .auth-screen-tmrc {
     position: relative;
     top: auto;
     left: auto;
-    margin-bottom: 12px;
+    margin-bottom: 8px;
   }
 
   .auth-screen-tmrac {
     position: relative;
     left: auto;
     bottom: auto;
-    margin-top: 8px;
-  }
-
-  .auth-screen-copy {
-    margin-top: 0;
-  }
-
-  .auth-screen-features {
-    padding-bottom: 0;
+    margin-top: 12px;
   }
 
   .auth-screen-panel {
