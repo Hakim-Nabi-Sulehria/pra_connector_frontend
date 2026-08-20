@@ -3,37 +3,45 @@ import { Link, Navigate, useNavigate, useSearchParams } from 'react-router-dom';
 import { useAuth } from '../auth';
 import { api, type IntegrationMode } from '../lib/api';
 import { IntegrationModeLoginTabs } from '../components/IntegrationModeTabs';
+import { AuthShell } from '../components/AuthShell';
+import tmrcLogo from '../assets/branding/tmrc-logo.png';
+import tmracLogo from '../assets/branding/tmrac-logo.png';
+import tmrDiLogo from '../assets/branding/tmr-di-logo.png';
 
 export function LandingPage() {
   return (
-    <div className="landing">
-      <nav className="landing-nav">
-        <div className="brand-mark" style={{ fontFamily: 'var(--font-display)', fontWeight: 700 }}>
-          QuickBooks Online <span style={{ color: 'var(--teal)' }}>Connector</span>
-        </div>
+    <div className="landing premium-landing">
+      <nav className="landing-nav premium-landing-nav">
+        <img src={tmrDiLogo} alt="TMR DI Software" className="premium-landing-logo" />
         <div className="landing-actions">
           <Link className="btn btn-ghost" to="/login">
-            Customer login
+            Sign in
           </Link>
           <Link className="btn btn-primary" to="/admin/login">
             Super Admin
           </Link>
         </div>
       </nav>
-      <section className="landing-hero">
+      <section className="landing-hero premium-landing-hero">
+        <div className="premium-landing-kicker">QuickBooks Online Connector</div>
         <h1>
-          QuickBooks Online Connector
+          Smart invoicing for <em>PRA & FBR</em>
         </h1>
-          <p>
-          Connect QuickBooks Online to PRA and FBR invoicing.
+        <p>
+          Connect QuickBooks Online, configure fiscal mappings, and post compliant invoices with
+          confidence.
         </p>
         <div className="landing-actions">
-          <Link className="btn btn-primary" to="/register">
-            Start onboarding
+          <Link className="btn btn-primary" to="/login">
+            Sign in to workspace
           </Link>
-          <Link className="btn btn-ghost" to="/login">
-            Open workspace
+          <Link className="btn btn-ghost" to="/register">
+            Create account
           </Link>
+        </div>
+        <div className="premium-landing-partners">
+          <img src={tmrcLogo} alt="TMR Consulting" />
+          <img src={tmracLogo} alt="TMRAC" />
         </div>
         <p className="legal-links">
           <Link to="/terms">Terms</Link> · <Link to="/privacy">Privacy</Link>
@@ -43,48 +51,11 @@ export function LandingPage() {
   );
 }
 
-function AuthShell({
-  title,
-  hint,
-  children,
-  visualTitle,
-  visualBody,
-  variant = 'pra',
-}: {
-  title: string;
-  hint: string;
-  children: React.ReactNode;
-  visualTitle: string;
-  visualBody: string;
-  variant?: 'pra' | 'fbr';
-}) {
-  return (
-    <div className={`auth-page${variant === 'fbr' ? ' theme-di-auth' : ''}`}>
-      <div className="auth-visual">
-        <div>
-          <div style={{ opacity: 0.7, marginBottom: 18, fontWeight: 700 }}>
-            QuickBooks Online Connector
-          </div>
-          <h1>{visualTitle}</h1>
-          <p>{visualBody}</p>
-        </div>
-      </div>
-      <div className="auth-panel">
-        <div className="auth-card">
-          <h2>{title}</h2>
-          <p className="hint">{hint}</p>
-          {children}
-        </div>
-      </div>
-    </div>
-  );
-}
 
-export function AdminLoginPage() {
-  const { login, user, portal, loading } = useAuth();
+export function AdminLoginPage() {  const { login, user, portal, loading } = useAuth();
   const navigate = useNavigate();
-  const [email, setEmail] = useState('admin@praconnector.com');
-  const [password, setPassword] = useState('Admin@12345');
+  const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
   const [error, setError] = useState('');
   const [busy, setBusy] = useState(false);
 
@@ -108,16 +79,23 @@ export function AdminLoginPage() {
 
   return (
     <AuthShell
+      variant="admin"
       title="Super Admin access"
-      hint="Sign in to the admin portal."
-      visualTitle="Admin portal"
-      visualBody="Manage companies, connections, and invoice posting."
+      hint="Sign in to manage companies, connections, and platform settings."
+      visualTitle="Platform command center"
+      visualBody="Oversee companies, QuickBooks connections, and fiscal integrations from one secure admin portal."
     >
-      <form onSubmit={onSubmit}>
+      <form className="premium-auth-form" onSubmit={onSubmit}>
         {error && <div className="error-box">{error}</div>}
         <div className="field">
           <label>Email</label>
-          <input value={email} onChange={(e) => setEmail(e.target.value)} type="email" required />
+          <input
+            value={email}
+            onChange={(e) => setEmail(e.target.value)}
+            type="email"
+            placeholder="admin@company.com"
+            required
+          />
         </div>
         <div className="field">
           <label>Password</label>
@@ -125,14 +103,15 @@ export function AdminLoginPage() {
             value={password}
             onChange={(e) => setPassword(e.target.value)}
             type="password"
+            placeholder="Enter your password"
             required
           />
         </div>
-        <button className="btn btn-primary" style={{ width: '100%' }} disabled={busy}>
+        <button className="btn btn-primary premium-auth-submit" disabled={busy}>
           {busy ? 'Signing in…' : 'Enter admin portal'}
         </button>
-        <p style={{ marginTop: 14, fontSize: 13, color: 'var(--muted)' }}>
-          Customer? <Link to="/login">Go to workspace login</Link>
+        <p className="premium-auth-switch">
+          Customer workspace? <Link to="/login">Go to sign in</Link>
         </p>
       </form>
     </AuthShell>
@@ -144,8 +123,8 @@ export function CustomerLoginPage() {
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
   const [mode, setMode] = useState<IntegrationMode>('FBR');
-  const [email, setEmail] = useState('fbrtestuser@qboconnector.com');
-  const [password, setPassword] = useState('Fbrtest@12345');
+  const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
   const [error, setError] = useState('');
   const [busy, setBusy] = useState(false);
   const [captcha, setCaptcha] = useState(() => {
@@ -181,29 +160,24 @@ export function CustomerLoginPage() {
   return (
     <AuthShell
       variant={mode === 'FBR' ? 'fbr' : 'pra'}
-      title="Customer workspace"
-      hint="Sign in to your workspace."
-      visualTitle="Customer workspace"
+      title="Welcome back"
+      hint="Sign in to your workspace and continue fiscal invoicing."
+      visualTitle="Smart invoicing, simplified business"
       visualBody={
         mode === 'FBR'
-          ? 'Connect QuickBooks and post invoices to FBR.'
-          : 'Connect QuickBooks and post invoices to PRA.'
+          ? 'Connect QuickBooks Online and post compliant invoices to FBR in real time.'
+          : 'Connect QuickBooks Online and post compliant invoices to PRA in real time.'
       }
     >
       <IntegrationModeLoginTabs
         mode={mode}
         onChange={(next) => {
           setMode(next);
-          if (next === 'FBR') {
-            setEmail('fbrtestuser@qboconnector.com');
-            setPassword('Fbrtest@12345');
-          } else {
-            setEmail('pratestuser@qboconnector.com');
-            setPassword('Pratest@12345');
-          }
+          setEmail('');
+          setPassword('');
         }}
       />
-      <form onSubmit={onSubmit}>
+      <form className="premium-auth-form" onSubmit={onSubmit}>
         {searchParams.get('qbo') === 'connected' && (
           <div className="card flash-ok" style={{ marginBottom: 14 }}>
             QuickBooks was approved. Sign in to open your workspace.
@@ -217,7 +191,13 @@ export function CustomerLoginPage() {
         {error && <div className="error-box">{error}</div>}
         <div className="field">
           <label>Work email</label>
-          <input value={email} onChange={(e) => setEmail(e.target.value)} type="email" required />
+          <input
+            value={email}
+            onChange={(e) => setEmail(e.target.value)}
+            type="email"
+            placeholder="you@company.com"
+            required
+          />
         </div>
         <div className="field">
           <label>Password</label>
@@ -225,20 +205,20 @@ export function CustomerLoginPage() {
             value={password}
             onChange={(e) => setPassword(e.target.value)}
             type="password"
+            placeholder="Enter your password"
             required
           />
         </div>
         <div className="field">
           <label>Captcha</label>
-          <div style={{ display: 'flex', gap: 10, alignItems: 'center', flexWrap: 'wrap' }}>
-            <span className="badge" style={{ fontFamily: 'ui-monospace, monospace' }}>
+          <div className="premium-auth-captcha">
+            <span className="premium-auth-captcha-chip">
               {captcha.a} + {captcha.b} = ?
             </span>
             <input
               value={captchaInput}
               onChange={(e) => setCaptchaInput(e.target.value)}
-              placeholder="Enter answer"
-              style={{ width: 180 }}
+              placeholder="Answer"
               required
             />
             <button
@@ -251,24 +231,23 @@ export function CustomerLoginPage() {
                 setCaptchaInput('');
               }}
             >
-              Refresh captcha
+              Refresh
             </button>
           </div>
         </div>
-        <button className="btn btn-primary" style={{ width: '100%' }} disabled={busy}>
-          {busy ? 'Signing in…' : 'Open workspace'}
+        <button className="btn btn-primary premium-auth-submit" disabled={busy}>
+          {busy ? 'Signing in…' : 'Sign in to workspace'}
         </button>
         <button
-          className="btn btn-ghost"
-          style={{ width: '100%', marginTop: 10 }}
+          className="btn btn-ghost premium-auth-secondary"
           type="button"
           disabled={busy}
           onClick={() => navigate('/reset-password')}
         >
           Reset password
         </button>
-        <p style={{ marginTop: 14, fontSize: 13, color: 'var(--muted)' }}>
-          New org? <Link to="/register">Create account</Link>
+        <p className="premium-auth-switch">
+          New organization? <Link to="/register">Create account</Link>
           {' · '}
           <Link to="/admin/login">Super Admin</Link>
         </p>
@@ -328,17 +307,17 @@ export function RegisterPage() {
   return (
     <AuthShell
       variant={mode === 'FBR' ? 'fbr' : 'pra'}
-      title="Create your organization"
-      hint="Create a company workspace."
-      visualTitle="Create workspace"
+      title="Create your workspace"
+      hint="Register your organization and start fiscal invoicing."
+      visualTitle="Launch in minutes"
       visualBody={
         mode === 'FBR'
-          ? 'Register your company for FBR invoicing.'
-          : 'Register your company for PRA invoicing.'
+          ? 'Set up your company workspace for FBR digital invoicing.'
+          : 'Set up your company workspace for PRA fiscal invoicing.'
       }
     >
       <IntegrationModeLoginTabs mode={mode} onChange={setMode} />
-      <form onSubmit={onSubmit}>
+      <form className="premium-auth-form" onSubmit={onSubmit}>
         {error && <div className="error-box">{error}</div>}
         {(
           [
@@ -359,10 +338,10 @@ export function RegisterPage() {
             />
           </div>
         ))}
-        <button className="btn btn-primary" style={{ width: '100%' }} disabled={busy}>
+        <button className="btn btn-primary premium-auth-submit" disabled={busy}>
           {busy ? 'Creating…' : 'Create workspace'}
         </button>
-        <p style={{ marginTop: 14, fontSize: 13, color: 'var(--muted)' }}>
+        <p className="premium-auth-switch">
           Already onboarded? <Link to="/login">Sign in</Link>
         </p>
       </form>

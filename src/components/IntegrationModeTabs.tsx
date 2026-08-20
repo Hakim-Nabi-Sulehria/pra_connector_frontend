@@ -61,19 +61,17 @@ export function IntegrationModeLoginTabs({
   onChange: (m: IntegrationMode) => void;
 }) {
   return (
-    <div className="mode-tabs" style={{ display: 'flex', gap: 8, marginBottom: 16 }}>
+    <div className="premium-auth-mode-tabs">
       <button
         type="button"
-        className={`btn ${mode === 'PRA' ? 'btn-primary' : 'btn-ghost'}`}
-        style={{ flex: 1 }}
+        className={mode === 'PRA' ? 'active' : ''}
         onClick={() => onChange('PRA')}
       >
         PRA
       </button>
       <button
         type="button"
-        className={`btn ${mode === 'FBR' ? 'btn-primary' : 'btn-ghost'}`}
-        style={{ flex: 1 }}
+        className={mode === 'FBR' ? 'active' : ''}
         onClick={() => onChange('FBR')}
       >
         FBR
