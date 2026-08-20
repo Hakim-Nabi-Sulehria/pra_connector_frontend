@@ -334,17 +334,15 @@ function CompanyFormFields({
           </button>
         </div>
       </div>
-      {form.environment === 'production' && (
-        <div className="field">
-          <label>PRA POS ID</label>
-          <input
-            value={form.posId}
-            onChange={(e) => setForm({ ...form, posId: e.target.value })}
-            placeholder="POS ID"
-            disabled={disabled}
-          />
-        </div>
-      )}
+      <div className="field">
+        <label>PRA POS ID</label>
+        <input
+          value={form.posId}
+          onChange={(e) => setForm({ ...form, posId: e.target.value })}
+          placeholder="POS ID from PRA IMS"
+          disabled={disabled}
+        />
+      </div>
       <div className="field">
         <label>PRA API URL</label>
         <input
@@ -560,11 +558,9 @@ export function AdminCompanyDetailPage() {
               {(company.pra?.environment || 'sandbox').toUpperCase()}
               {company.pra?.hasToken ? ' · token configured' : ' · no token'}
             </div>
-            {company.pra?.environment === 'production' && company.pra?.posId && (
-              <div style={{ color: 'var(--muted)', fontSize: 13, marginTop: 6 }}>
-                POS ID: <strong>{company.pra.posId}</strong>
-              </div>
-            )}
+            <div style={{ color: 'var(--muted)', fontSize: 13, marginTop: 6 }}>
+              POS ID: <strong>{company.pra?.posId || '—'}</strong>
+            </div>
           </div>
         </div>
       </div>
